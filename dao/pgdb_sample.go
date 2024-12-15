@@ -13,7 +13,9 @@ type PGDB struct {
 }
 
 func NewPostgreSQL(con string) (*PGDB, error) {
-	db, err := gorm.Open(postgres.Open(con), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(con), &gorm.Config{
+		//Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		log.Println("failed new db")
 		return nil, err

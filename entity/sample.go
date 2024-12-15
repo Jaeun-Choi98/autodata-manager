@@ -7,7 +7,7 @@ type User struct {
 	Age     int            `json:"age"`
 	Name    string         `json:"name"`
 	Hobbies pq.StringArray `json:"hobbies" gorm:"type:text[]"`
-	Jobs    []Job          `json:"jobs"`
+	Jobs    []Job          `json:"jobs" gorm:"foreignKey:UserId"`
 }
 
 type Job struct {
