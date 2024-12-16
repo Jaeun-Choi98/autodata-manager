@@ -1,9 +1,11 @@
 package main
 
+import "cju/service"
+
 func main() {
 
 	// var mydb dao.DBLayerInterface
-	// con := "user=postgres dbname=test password=cjswo123 host=localhost port=5432 sslmode=disable"
+	con := "user=postgres dbname=test password=cjswo123 host=localhost port=5432 sslmode=disable"
 	// mydb, _ = dao.NewPostgreSQL(con)
 	// defer mydb.ClosePostgreSQL()
 
@@ -12,4 +14,11 @@ func main() {
 	// if err != nil {
 	// 	log.Println(err)
 	// }
+
+	var sv service.ServiceInterface
+	sv, _ = service.NewService(con)
+	defer sv.CloseService()
+	sv.CreateTableFromCSV("data.csv", "data")
+	//sv.DropTableByTableName("data")
+
 }
