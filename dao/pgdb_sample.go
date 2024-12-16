@@ -12,7 +12,7 @@ type PGDB struct {
 	db *gorm.DB
 }
 
-func NewPostgreSQL(con string) (*PGDB, error) {
+func NewPGDB(con string) (*PGDB, error) {
 	db, err := gorm.Open(postgres.Open(con), &gorm.Config{
 		//Logger: logger.Default.LogMode(logger.Info),
 	})
