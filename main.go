@@ -19,6 +19,8 @@ func main() {
 	sv, _ = service.NewService(con)
 	defer sv.CloseService()
 	sv.CreateTableFromCSV("data.csv", "data")
+	sv.CreateTableFromExcel("data.xlsx", "data_excel")
+	sv.CreateTableFromJSON("data.json", "data_json")
 	//sv.DropTableByTableName("data")
 
 }

@@ -12,7 +12,7 @@ func (s *Service) CreateTableFromCSV(filePath, tableName string) error {
 
 	exists := s.mydb.ExistTable(tableName)
 	if exists {
-		log.Printf("existed %s table", tableName)
+		log.Printf("existed '%s' table", tableName)
 		return nil
 	}
 
@@ -46,37 +46,12 @@ func (s *Service) CreateTableFromCSV(filePath, tableName string) error {
 		log.Printf("nothing records")
 		return err
 	}
-	err = addRecord(s, &tableName, &headers, &records)
+	err = addCSVRecord(s, &tableName, &headers, &records)
 	if err != nil {
 		return err
 	}
 	log.Printf("Add records!")
 
-	return nil
-}
-
-func addRecord(s *Service, tableName *string, headers *[]string, records *[][]string) error {
-
-	var query strings.Builder
-	query.WriteString(fmt.Sprintf("INSERT INTO %s(%s) VALUES ", *tableName, strings.Join(*headers, ", ")))
-
-	leng := len(*records)
-	for i, record := range *records {
-		for j, field := range record {
-			record[j] = fmt.Sprintf("'%s'", field)
-		}
-		query.WriteString(fmt.Sprintf("(%s)", strings.Join(record, ", ")))
-		if i < leng-1 {
-			query.WriteString(", ")
-		}
-	}
-	query.WriteString(";")
-
-	err := s.mydb.ExecQuery(query.String())
-	if err != nil {
-		log.Printf("failed to add records")
-		return err
-	}
 	return nil
 }
 
@@ -114,4 +89,29 @@ func createTableFromCSVHeaders(s *Service, tableName *string, headers *[]string)
 	query.WriteString(");")
 
 	return s.mydb.ExecQuery(query.String())
+}
+
+func addCSVRecord(s *Service, tableName *string, headers *[]string, records *[][]string) error {
+
+	var query strings.Builder
+	query.WriteString(fmt.Sprintf("INSERT INTO %s(%s) VALUES ", *tableName, strings.Join(*headers, ", ")))
+
+	leng := len(*records)
+	for i, record := range *records {
+		for j, field := range record {
+			record[j] = fmt.Sprintf("'%s'", field)
+		}
+		query.WriteString(fmt.Sprintf("(%s)", strings.Join(record, ", ")))
+		if i < leng-1 {
+			query.WriteString(", ")
+		}
+	}
+	query.WriteString(";")
+
+	err := s.mydb.ExecQuery(query.String())
+	if err != nil {
+		log.Printf("failed to add records")
+		return err
+	}
+	return nil
 }

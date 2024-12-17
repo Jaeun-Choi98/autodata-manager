@@ -1,0 +1,17 @@
+[
+  {
+    "name": "John Doe",
+    "age": 30,
+    "hobbies": "Reading, Cycling, Gaming"
+  },
+  {
+    "name": "Alice Johnson",
+    "age": 25,
+    "hobbies": "Painting, Hiking, Photography"
+  },
+  {
+    "name": "Michael Smith",
+    "age": 40,
+    "hobbies": "Fishing, Golf, Cooking"
+  }
+]

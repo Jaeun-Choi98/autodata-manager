@@ -9,6 +9,8 @@ type ServiceInterface interface {
 	CloseService() error
 	CreateTableFromCSV(filePath, tableName string) error
 	DropTableByTableName(tableName string) error
+	CreateTableFromExcel(filePath, tableName string) error
+	CreateTableFromJSON(filePath, tableName string) error
 }
 
 type Service struct {
