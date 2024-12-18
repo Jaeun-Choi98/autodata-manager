@@ -13,7 +13,7 @@ func (s *Service) CreateTableFromCSV(filePath, tableName string) error {
 	exists := s.mydb.ExistTable(tableName)
 	if exists {
 		log.Printf("existed '%s' table", tableName)
-		return nil
+		return fmt.Errorf("existed '%s' table", tableName)
 	}
 
 	//read csv file

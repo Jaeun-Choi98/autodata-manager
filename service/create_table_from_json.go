@@ -13,8 +13,8 @@ type Record map[string]interface{} // 동적으로 키-값을 가지는 레코�
 func (s *Service) CreateTableFromJSON(filePath, tableName string) error {
 	exists := s.mydb.ExistTable(tableName)
 	if exists {
-		log.Printf("Table '%s' already exists", tableName)
-		return nil
+		log.Printf("existed '%s' table", tableName)
+		return fmt.Errorf("existed '%s' table", tableName)
 	}
 
 	// JSON 파일 열기

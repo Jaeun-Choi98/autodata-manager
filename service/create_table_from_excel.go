@@ -12,7 +12,7 @@ func (s *Service) CreateTableFromExcel(filePath, tableName string) error {
 
 	if s.mydb.ExistTable(tableName) {
 		log.Printf("existed '%s' table", tableName)
-		return nil
+		return fmt.Errorf("existed '%s' table", tableName)
 	}
 
 	file, err := excelize.OpenFile(filePath)
