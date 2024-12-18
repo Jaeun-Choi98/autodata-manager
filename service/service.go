@@ -11,6 +11,7 @@ type ServiceInterface interface {
 	DropTableByTableName(tableName string) error
 	CreateTableFromExcel(filePath, tableName string) error
 	CreateTableFromJSON(filePath, tableName string) error
+	ExportTableToJsonAndCSV(tableName, filePath string) error
 }
 
 type Service struct {

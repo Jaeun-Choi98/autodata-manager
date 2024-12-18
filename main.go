@@ -22,5 +22,5 @@ func main() {
 	sv.CreateTableFromExcel("data.xlsx", "data_excel")
 	sv.CreateTableFromJSON("data.json", "data_json")
 	//sv.DropTableByTableName("data")
-
+	sv.ExportTableToJsonAndCSV("data", "export_data")
 }

@@ -48,3 +48,13 @@ func (pq *PostgreSQL) ExistTable(tableName string) bool {
 	exists := pq.db.Migrator().HasTable(tableName)
 	return exists
 }
+
+func (pq *PostgreSQL) ReadAllTableData(tableName string) ([]map[string]interface{}, error) {
+	var rows []map[string]interface{}
+	err := pq.db.Table(tableName).Find(&rows).Error
+	if err != nil {
+		log.Printf("failed to query table data: %v", err)
+		return nil, err
+	}
+	return rows, nil
+}
