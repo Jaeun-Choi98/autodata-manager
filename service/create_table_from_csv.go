@@ -24,38 +24,43 @@ func (s *Service) CreateTableFromCSV(filePath, tableName string) error {
 	}
 	defer file.Close()
 
-	//read headers
+	//read headers and records
 	reader := csv.NewReader(file)
 	headers, err := reader.Read()
 	if err != nil {
 		log.Printf("failed to read CSV header: %v", err)
 		return err
 	}
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Printf("failed to read records")
+		return err
+	}
 
 	// createTableFromCSVHeaders 함수: CSV 헤더 기반으로 테이블 생성
-	err = createTableFromCSVHeaders(s, &tableName, &headers)
+	err = createTableFromCSVHeaders(s, &tableName, &headers, &records)
 	if err != nil {
 		log.Printf("failed to create table: %v", err)
 		return err
 	}
 	log.Printf("Table '%s' created successfully!", tableName)
 
-	//레코드 추가
-	records, err := reader.ReadAll()
-	if err != nil {
+	// add records
+	if len(records) == 0 {
 		log.Printf("nothing records")
-		return err
+	} else {
+		err = addCSVRecord(s, &tableName, &headers, &records)
+		if err != nil {
+			log.Printf("failed to add records")
+			return err
+		}
+		log.Printf("Add records!")
 	}
-	err = addCSVRecord(s, &tableName, &headers, &records)
-	if err != nil {
-		return err
-	}
-	log.Printf("Add records!")
 
 	return nil
 }
 
-func createTableFromCSVHeaders(s *Service, tableName *string, headers *[]string) error {
+func createTableFromCSVHeaders(s *Service, tableName *string, headers *[]string, records *[][]string) error {
 
 	fields := make([]struct {
 		Name     string
@@ -68,12 +73,26 @@ func createTableFromCSVHeaders(s *Service, tableName *string, headers *[]string)
 		DataType string
 	}{"id", "SERIAL PRIMARY KEY"})
 
-	for _, header := range *headers {
+	// 샘플링 size 100, 이후 랜덤하게(or규칙적이게) 샘플링 하는 로직 필요할 수도 있음.
+	size := len(*records)
+	if size > 100 {
+		size = 100
+	}
+
+	for col, header := range *headers {
+
+		series := make([]string, size)
+		for i := 0; i < size; i++ {
+			series[i] = (*records)[i][col]
+		}
+
+		dataType := inferDataType(&series)
+
 		// default type: TEXT
 		fields = append(fields, struct {
 			Name     string
 			DataType string
-		}{header, "TEXT"})
+		}{header, dataType})
 	}
 
 	// build sql query

@@ -38,7 +38,7 @@ func (s *Service) CreateTableFromJSON(filePath, tableName string) error {
 	headers := extractHeaders(&records)
 
 	// 테이블 생성
-	err = createTableFromJSONHeaders(s, &tableName, &headers)
+	err = createTableFromJSONHeaders(s, &tableName, &headers, &records)
 	if err != nil {
 		log.Printf("failed to create table: %v", err)
 		return err
@@ -94,7 +94,7 @@ func addJSONRecords(s *Service, tableName *string, headers *[]string, records *[
 	return nil
 }
 
-func createTableFromJSONHeaders(s *Service, tableName *string, headers *[]string) error {
+func createTableFromJSONHeaders(s *Service, tableName *string, headers *[]string, records *[]Record) error {
 	fields := make([]struct {
 		Name     string
 		DataType string
@@ -106,13 +106,28 @@ func createTableFromJSONHeaders(s *Service, tableName *string, headers *[]string
 		DataType string
 	}{"id", "SERIAL PRIMARY KEY"})
 
+	size := len(*records)
+	if size > 100 {
+		size = 100
+	}
+
 	// JSON 헤더를 기반으로 필드 정의
 	for _, header := range *headers {
-		// 기본 데이터 타입은 TEXT로 설정
+
+		series := make([]string, size)
+		for i, record := range *records {
+			if i == size {
+				break
+			}
+			series[i] = fmt.Sprintf("%v", record[header])
+		}
+
+		dataType := inferDataType(&series)
+
 		fields = append(fields, struct {
 			Name     string
 			DataType string
-		}{header, "TEXT"})
+		}{header, dataType})
 	}
 
 	// 테이블 생성 SQL 쿼리 빌드

@@ -3,6 +3,7 @@ package service
 import (
 	"cju/dao"
 	"log"
+	"strconv"
 )
 
 type ServiceInterface interface {
@@ -33,4 +34,38 @@ func (s *Service) CloseService() error {
 		return err
 	}
 	return nil
+}
+
+// utils, 공통적으로 사용되는 함수. 이후 파일 구조 변경 필요.
+func inferDataType(columnData *[]string) string {
+
+	if len(*columnData) == 0 {
+		return "TEXT"
+	}
+
+	isInt := true
+	isFloat := true
+	isBool := true
+	for _, value := range *columnData {
+		if _, err := strconv.Atoi(value); err != nil {
+			isInt = false
+		}
+		if _, err := strconv.ParseFloat(value, 64); err != nil {
+			isFloat = false
+		}
+		if value != "true" && value != "false" {
+			isBool = false
+		}
+	}
+
+	switch {
+	case isInt:
+		return "INTEGER"
+	case isFloat:
+		return "FLOAT"
+	case isBool:
+		return "BOOLEAN"
+	default:
+		return "TEXT"
+	}
 }

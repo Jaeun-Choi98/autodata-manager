@@ -31,13 +31,20 @@ func (s *Service) CreateTableFromExcel(filePath, tableName string) error {
 
 	// Excel 데이터를 읽기
 	rows, err := file.GetRows(sheetName)
-	if err != nil || len(rows) < 2 {
-		log.Printf("Failed to read rows or no sufficient data: %v", err)
-		return fmt.Errorf("insufficient data in Excel file")
+	if err != nil {
+		log.Printf("failed to read rows: %v", err)
+		return err
+	}
+
+	var records [][]string
+	if len(rows) > 0 {
+		records = rows[1:] // 헤더를 제외한 나머지 행
+	} else {
+		records = make([][]string, 0)
 	}
 
 	// 테이블 생성
-	err = createTableFromExcelHeaders(s, &tableName, &rows[0])
+	err = createTableFromExcelHeaders(s, &tableName, &rows[0], &records)
 	if err != nil {
 		log.Printf("Failed to create table: %v", err)
 		return err
@@ -45,19 +52,21 @@ func (s *Service) CreateTableFromExcel(filePath, tableName string) error {
 	log.Printf("Table '%s' created successfully!", tableName)
 
 	// 레코드 추가
-	records := rows[1:] // 헤더를 제외한 나머지 행
-	err = addExcelRecord(s, &tableName, &rows[0], &records)
-	if err != nil {
-		log.Printf("Failed to add records: %v", err)
-		return err
+	if len(records) == 0 {
+		log.Printf("nothing records")
+	} else {
+		err = addExcelRecord(s, &tableName, &rows[0], &records)
+		if err != nil {
+			log.Printf("failed to add records: %v", err)
+			return err
+		}
+		log.Println("Records added successfully!")
 	}
-	log.Println("Records added successfully!")
-
 	return nil
 }
 
-func createTableFromExcelHeaders(s *Service, tableName *string, headers *[]string) error {
-	// 필드 정의
+func createTableFromExcelHeaders(s *Service, tableName *string, headers *[]string, records *[][]string) error {
+
 	fields := make([]struct {
 		Name     string
 		DataType string
@@ -69,12 +78,25 @@ func createTableFromExcelHeaders(s *Service, tableName *string, headers *[]strin
 		DataType string
 	}{"id", "SERIAL PRIMARY KEY"})
 
-	// 나머지 필드 (TEXT 타입) 이후 도메인 로직 추가 필요.
-	for _, header := range *headers {
+	// 샘플링 size 100, 이후 랜덤하게(or규칙적이게) 샘플링 하는 로직 필요할 수도 있음.
+	size := len(*records)
+	if size > 100 {
+		size = 100
+	}
+
+	for col, header := range *headers {
+
+		series := make([]string, size)
+		for i := 0; i < size; i++ {
+			series[i] = (*records)[i][col]
+		}
+
+		dataType := inferDataType(&series)
+
 		fields = append(fields, struct {
 			Name     string
 			DataType string
-		}{header, "TEXT"})
+		}{header, dataType})
 	}
 
 	// SQL 쿼리 빌드
