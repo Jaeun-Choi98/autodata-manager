@@ -12,6 +12,7 @@ type ServiceInterface interface {
 	CreateTableFromExcel(filePath, tableName string) error
 	CreateTableFromJSON(filePath, tableName string) error
 	ExportTableToJsonAndCSV(tableName, filePath string) error
+	CreateNormalizeTableFromCSV(filePath string) error
 }
 
 type Service struct {

@@ -1,0 +1,202 @@
+[
+    {
+        "OrderID":1,
+        "CustomerName":"Alice Kim",
+        "CustomerAddress":"Seoul, South Korea",
+        "ProductName":"Laptop",
+        "ProductCategory":"Electronics",
+        "Quantity":1,
+        "Price":1200,
+        "OrderDate":"2024-12-01"
+    },
+    {
+        "OrderID":2,
+        "CustomerName":"Bob Lee",
+        "CustomerAddress":"Busan, South Korea",
+        "ProductName":"Smartphone",
+        "ProductCategory":"Electronics",
+        "Quantity":2,
+        "Price":800,
+        "OrderDate":"2024-12-02"
+    },
+    {
+        "OrderID":3,
+        "CustomerName":"Alice Kim",
+        "CustomerAddress":"Seoul, South Korea",
+        "ProductName":"Mouse",
+        "ProductCategory":"Accessories",
+        "Quantity":1,
+        "Price":25,
+        "OrderDate":"2024-12-01"
+    },
+    {
+        "OrderID":4,
+        "CustomerName":"Charlie Park",
+        "CustomerAddress":"Daegu, South Korea",
+        "ProductName":"Desk Chair",
+        "ProductCategory":"Furniture",
+        "Quantity":1,
+        "Price":150,
+        "OrderDate":"2024-12-03"
+    },
+    {
+        "OrderID":5,
+        "CustomerName":"Alice Kim",
+        "CustomerAddress":"Seoul, South Korea",
+        "ProductName":"Keyboard",
+        "ProductCategory":"Accessories",
+        "Quantity":1,
+        "Price":45,
+        "OrderDate":"2024-12-01"
+    },
+    {
+        "OrderID":6,
+        "CustomerName":"Bob Lee",
+        "CustomerAddress":"Busan, South Korea",
+        "ProductName":"Monitor",
+        "ProductCategory":"Electronics",
+        "Quantity":1,
+        "Price":300,
+        "OrderDate":"2024-12-02"
+    },
+    {
+        "OrderID":7,
+        "CustomerName":"David Choi",
+        "CustomerAddress":"Incheon, South Korea",
+        "ProductName":"Book",
+        "ProductCategory":"Books",
+        "Quantity":3,
+        "Price":30,
+        "OrderDate":"2024-12-04"
+    },
+    {
+        "OrderID":8,
+        "CustomerName":"Alice Kim",
+        "CustomerAddress":"Seoul, South Korea",
+        "ProductName":"USB Cable",
+        "ProductCategory":"Accessories",
+        "Quantity":2,
+        "Price":10,
+        "OrderDate":"2024-12-01"
+    },
+    {
+        "OrderID":9,
+        "CustomerName":"Charlie Park",
+        "CustomerAddress":"Daegu, South Korea",
+        "ProductName":"Table",
+        "ProductCategory":"Furniture",
+        "Quantity":1,
+        "Price":200,
+        "OrderDate":"2024-12-03"
+    },
+    {
+        "OrderID":10,
+        "CustomerName":"Bob Lee",
+        "CustomerAddress":"Busan, South Korea",
+        "ProductName":"Laptop Bag",
+        "ProductCategory":"Accessories",
+        "Quantity":1,
+        "Price":50,
+        "OrderDate":"2024-12-02"
+    },
+    {
+        "OrderID":11,
+        "CustomerName":"David Choi",
+        "CustomerAddress":"Incheon, South Korea",
+        "ProductName":"Notebook",
+        "ProductCategory":"Stationery",
+        "Quantity":5,
+        "Price":15,
+        "OrderDate":"2024-12-04"
+    },
+    {
+        "OrderID":12,
+        "CustomerName":"Alice Kim",
+        "CustomerAddress":"Seoul, South Korea",
+        "ProductName":"Pen",
+        "ProductCategory":"Stationery",
+        "Quantity":10,
+        "Price":5,
+        "OrderDate":"2024-12-01"
+    },
+    {
+        "OrderID":13,
+        "CustomerName":"Bob Lee",
+        "CustomerAddress":"Busan, South Korea",
+        "ProductName":"Headphones",
+        "ProductCategory":"Electronics",
+        "Quantity":1,
+        "Price":100,
+        "OrderDate":"2024-12-02"
+    },
+    {
+        "OrderID":14,
+        "CustomerName":"Charlie Park",
+        "CustomerAddress":"Daegu, South Korea",
+        "ProductName":"Lamp",
+        "ProductCategory":"Furniture",
+        "Quantity":2,
+        "Price":60,
+        "OrderDate":"2024-12-03"
+    },
+    {
+        "OrderID":15,
+        "CustomerName":"Alice Kim",
+        "CustomerAddress":"Seoul, South Korea",
+        "ProductName":"Power Bank",
+        "ProductCategory":"Electronics",
+        "Quantity":1,
+        "Price":40,
+        "OrderDate":"2024-12-01"
+    },
+    {
+        "OrderID":16,
+        "CustomerName":"David Choi",
+        "CustomerAddress":"Incheon, South Korea",
+        "ProductName":"Backpack",
+        "ProductCategory":"Accessories",
+        "Quantity":1,
+        "Price":70,
+        "OrderDate":"2024-12-04"
+    },
+    {
+        "OrderID":17,
+        "CustomerName":"Bob Lee",
+        "CustomerAddress":"Busan, South Korea",
+        "ProductName":"Tablet",
+        "ProductCategory":"Electronics",
+        "Quantity":1,
+        "Price":500,
+        "OrderDate":"2024-12-02"
+    },
+    {
+        "OrderID":18,
+        "CustomerName":"Alice Kim",
+        "CustomerAddress":"Seoul, South Korea",
+        "ProductName":"Coffee Mug",
+        "ProductCategory":"Kitchenware",
+        "Quantity":2,
+        "Price":20,
+        "OrderDate":"2024-12-01"
+    },
+    {
+        "OrderID":19,
+        "CustomerName":"Charlie Park",
+        "CustomerAddress":"Daegu, South Korea",
+        "ProductName":"Sofa",
+        "ProductCategory":"Furniture",
+        "Quantity":1,
+        "Price":800,
+        "OrderDate":"2024-12-03"
+    },
+    {
+        "OrderID":20,
+        "CustomerName":"David Choi",
+        "CustomerAddress":"Incheon, South Korea",
+        "ProductName":"Eraser",
+        "ProductCategory":"Stationery",
+        "Quantity":10,
+        "Price":2,
+        "OrderDate":"2024-12-04"
+    }
+]

@@ -43,7 +43,7 @@ func (s *Service) CreateTableFromExcel(filePath, tableName string) error {
 	}
 
 	// 테이블 생성
-	err = CreateTableFromStringArr(s, &tableName, &rows[0], &records)
+	err = CreateTableFromStringArr(s, &tableName, &rows[0], &records, false)
 	if err != nil {
 		log.Printf("Failed to create table: %v", err)
 		return err

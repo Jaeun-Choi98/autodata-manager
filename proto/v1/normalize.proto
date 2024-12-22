@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package normalize;
+
+option go_package = "/normalize";
+
+service NormalizeService {
+    rpc NormalizeTable (TableData) returns (NormalizedTable) {}
+}
+
+message TableData {
+    string data = 1;
+}
+
+message NormalizedTable {
+    string result = 1;
+}

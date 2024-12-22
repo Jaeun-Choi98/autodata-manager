@@ -18,10 +18,11 @@ func main() {
 	var sv service.ServiceInterface
 	sv, _ = service.NewService(con)
 	defer sv.CloseService()
-	sv.CreateTableFromCSV("data_nothing_records.csv", "datatest")
-	sv.CreateTableFromCSV("data.csv", "data_csv")
-	sv.CreateTableFromExcel("data.xlsx", "data_excel")
-	sv.CreateTableFromJSON("data.json", "data_json")
-	//sv.DropTableByTableName("data")
+	//sv.CreateTableFromCSV("data_nothing_records.csv", "datatest")
+	//sv.DropTableByTableName("data_excel")
+	//sv.CreateTableFromCSV("data.csv", "data_csv")
+	//sv.CreateTableFromExcel("data.xlsx", "data_excel")
+	//sv.CreateTableFromJSON("data.json", "data_json")
 	//sv.ExportTableToJsonAndCSV("data", "export_data")
+	sv.CreateNormalizeTableFromCSV("data.csv")
 }
