@@ -1,0 +1,32 @@
+[
+  {
+    "age": "30",
+    "hobbies": "Reading, Cycling, Gaming",
+    "id": "1",
+    "name": "John Doe"
+  },
+  {
+    "age": "25",
+    "hobbies": "Painting, Hiking, Photography",
+    "id": "2",
+    "name": "Alice Johnson"
+  },
+  {
+    "age": "40",
+    "hobbies": "Fishing, Golf, Cooking",
+    "id": "3",
+    "name": "Michael Smith"
+  },
+  {
+    "age": "22",
+    "hobbies": "Traveling, Dancing, Yoga",
+    "id": "4",
+    "name": "Emma Brown"
+  },
+  {
+    "age": "35",
+    "hobbies": "Gardening, Chess, Swimming",
+    "id": "5",
+    "name": "Oliver Jones"
+  }
+]
