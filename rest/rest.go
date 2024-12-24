@@ -25,7 +25,7 @@ func serveWithHandler(addr string, h handler.HandlerInterface) error {
 	r.POST("/service/create/excel", h.CreateTableExcel)
 	r.POST("/service/create/normalize/csv", h.CreateNormalizeTableCSV)
 	r.POST("/service/delete", h.DeleteTable)
-	r.POST("/service/export-json", h.ExportTableJSON)
-	r.POST("/service/export-csv", h.ExportTableCSV)
+	r.POST("/service/export/json", h.ExportTableJSON)
+	r.POST("/service/export/csv", h.ExportTableCSV)
 	return r.Run(addr)
 }
