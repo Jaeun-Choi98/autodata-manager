@@ -28,9 +28,9 @@ func (h *Handler) CreateTableCSV(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "table is created successfully",
-		"file":    file.Filename,
-		"table":   tableName,
+		"message":    "table is created successfully",
+		"saved_file": file.Filename,
+		"table_name": tableName,
 	})
 }
 
@@ -55,9 +55,9 @@ func (h *Handler) CreateTableJSON(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "table is created successfully",
-		"file":    file.Filename,
-		"table":   tableName,
+		"message":    "table is created successfully",
+		"saved_file": file.Filename,
+		"table_name": tableName,
 	})
 }
 
@@ -82,9 +82,9 @@ func (h *Handler) CreateTableExcel(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "table is created successfully",
-		"file":    file.Filename,
-		"table":   tableName,
+		"message":    "table is created successfully",
+		"saved_file": file.Filename,
+		"table_name": tableName,
 	})
 }
 
@@ -98,15 +98,16 @@ func (h *Handler) CreateNormalizeTableCSV(c *gin.Context) {
 	savePath := fmt.Sprintf("./resource/%s", file.Filename)
 	c.SaveUploadedFile(file, savePath)
 
-	err = h.myService.CreateNormalizeTableFromCSV(savePath)
+	retStr, err := h.myService.CreateNormalizeTableFromCSV(savePath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "table is normalized successfully",
-		"file":    file.Filename,
+		"message":    "table is normalized successfully",
+		"saved_file": file.Filename,
+		"info":       retStr,
 	})
 }
 
@@ -125,8 +126,8 @@ func (h *Handler) DeleteTable(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "table is deleted successfully",
-		"table":   tableName,
+		"message":    "table is deleted successfully",
+		"table_name": tableName,
 	})
 }
 

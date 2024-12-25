@@ -13,7 +13,7 @@ type ServiceInterface interface {
 	CreateTableFromJSON(filePath, tableName string) error
 	ExportTableToJSON(tableName string) (error, string)
 	ExportTableToCSV(tableName string) (error, string)
-	CreateNormalizeTableFromCSV(filePath string) error
+	CreateNormalizeTableFromCSV(filePath string) (string, error)
 }
 
 type Service struct {

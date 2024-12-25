@@ -10,20 +10,31 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-/*
-https://github.com/charmbracelet/bubbletea/tree/master/examples/table
-콘솔로 테이블 표를 만들려면 위 url 참고.
-*/
-
 var (
 	reader   = bufio.NewReader(os.Stdin)
 	myClient = client.NewClient()
 )
 
 func main() {
-	style := lipgloss.NewStyle().
+	// Guide 스타일
+	guideStyle := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("#FF5733"))
+
+	// 성공 스타일
+	successStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#00FF00"))
+
+	// 에러 스타일
+	errorStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#FF0000"))
+
+	// 결과 스타일
+	resStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#FFFFFF"))
 
 	guide := `
 Commands:
@@ -33,72 +44,87 @@ Commands:
   normalize <url> <filename> <extension>         - Normalize a table from a file
   exit                                           - Exit the program
 `
-	fmt.Println(style.Render(guide))
+	fmt.Println(guideStyle.Render(guide))
 
 	for {
-		fmt.Print(style.Render("\n> "))
+		fmt.Print(guideStyle.Render("\n> "))
 		cmd := nextline()
 
 		if len(cmd) == 0 {
-			fmt.Println("Invalid command. Please try again.")
+			fmt.Println(errorStyle.Render("Invalid command. Please try again."))
 			continue
 		}
 
 		switch cmd[0] {
 		case "create":
 			if len(cmd) != 5 {
-				fmt.Println("Usage: create <url> <filename> <tablename> <extension>")
+				fmt.Println(errorStyle.Render("Usage: create <url> <filename> <tablename> <extension>"))
 			} else {
-				err := myClient.MakeTable(cmd[1], cmd[2], cmd[3], cmd[4])
+				res, err := myClient.MakeTable(cmd[1], cmd[2], cmd[3], cmd[4])
 				if err != nil {
-					fmt.Printf("Error creating table: %v\n", err)
+					fmt.Println(errorStyle.Render(fmt.Sprintf("Error creating table [%v]", err)))
 				} else {
-					fmt.Println("Table created successfully.")
+					fmt.Println(successStyle.Render("Table created successfully."))
+					for key, val := range res {
+						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
+							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
+						))
+					}
 				}
 			}
 
 		case "delete":
 			if len(cmd) != 3 {
-				fmt.Println("Usage: delete <url> <tablename>")
+				fmt.Println(errorStyle.Render("Usage: delete <url> <tablename>"))
 			} else {
-				err := myClient.DropTable(cmd[1], cmd[2])
+				res, err := myClient.DropTable(cmd[1], cmd[2])
 				if err != nil {
-					fmt.Printf("Error deleting table: %v\n", err)
+					fmt.Println(errorStyle.Render(fmt.Sprintf("Error deleting table: [%v]", err)))
 				} else {
-					fmt.Println("Table deleted successfully.")
+					fmt.Println(successStyle.Render("Table deleted successfully."))
+					for key, val := range res {
+						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
+							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
+						))
+					}
 				}
 			}
 
 		case "export":
 			if len(cmd) != 4 {
-				fmt.Println("Usage: export <url> <tablename> <extension>")
+				fmt.Println(errorStyle.Render("Usage: export <url> <tablename> <extension>"))
 			} else {
 				err := myClient.ExportTable(cmd[1], cmd[2], cmd[3])
 				if err != nil {
-					fmt.Printf("Error exporting table: %v\n", err)
+					fmt.Println(errorStyle.Render(fmt.Sprintf("Error exporting table: [%v]", err)))
 				} else {
-					fmt.Println("Table exported successfully.")
+					fmt.Println(successStyle.Render(fmt.Sprintf("Table exported successfully. (%s.%s)", cmd[2], cmd[3])))
 				}
 			}
 
 		case "normalize":
 			if len(cmd) != 4 {
-				fmt.Println("Usage: normalize <url> <filename> <extension>")
+				fmt.Println(errorStyle.Render("Usage: normalize <url> <filename> <extension>"))
 			} else {
-				err := myClient.NormalizeTable(cmd[1], cmd[2], cmd[3])
+				res, err := myClient.NormalizeTable(cmd[1], cmd[2], cmd[3])
 				if err != nil {
-					fmt.Printf("Error normalizing table: %v\n", err)
+					fmt.Println(errorStyle.Render(fmt.Sprintf("Error normalizing table: [%v]", err)))
 				} else {
-					fmt.Println("Table normalized successfully.")
+					fmt.Println(successStyle.Render("Table normalized successfully."))
+					for key, val := range res {
+						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
+							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
+						))
+					}
 				}
 			}
 
 		case "exit":
-			fmt.Println("Exiting the program. Goodbye!")
+			fmt.Println(successStyle.Render("Exiting the program. Goodbye!"))
 			return
 
 		default:
-			fmt.Println("Invalid command. Please try again.")
+			fmt.Println(errorStyle.Render("Invalid command. Please try again."))
 		}
 	}
 }
