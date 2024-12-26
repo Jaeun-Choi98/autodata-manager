@@ -14,6 +14,8 @@ type ServiceInterface interface {
 	ExportTableToJSON(tableName string) (error, string)
 	ExportTableToCSV(tableName string) (error, string)
 	CreateNormalizeTableFromCSV(filePath string) (string, error)
+	ReadAllRecordByTableName(tableName string) ([]map[string]interface{}, error)
+	ReadAllTablesBySchemaNamd(schemaName string) ([]string, error)
 }
 
 type Service struct {

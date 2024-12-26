@@ -6,4 +6,5 @@ type DaoInterface interface {
 	ExecQuery(query string) error
 	ExistTable(tableName string) bool
 	ReadAllTableData(tableName string) ([]map[string]interface{}, error)
+	ReadAllTables(schemaName string) ([]string, error)
 }

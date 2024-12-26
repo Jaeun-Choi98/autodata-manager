@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/olekukonko/tablewriter"
 )
 
 var (
@@ -38,11 +39,13 @@ func main() {
 
 	guide := `
 Commands:
-  create <url> <filename> <tablename> <extension> - Create a table from a file
-  delete <url> <tablename>                       - Delete a table
-  export <url> <tablename> <extension>           - Export a table
-  normalize <url> <filename> <extension>         - Normalize a table from a file
-  exit                                           - Exit the program
+  tables    <url> <schemaName>                       - Get all tables form schema
+  create    <url> <fileName> <tableName> <extension> - Create a table from a file
+  delete    <url> <tableName>                        - Delete a table
+  read      <url> <tableName>                        - Read a table
+  export    <url> <tableName> <extension>            - Export a table
+  normalize <url> <fileName> <extension>             - Normalize a table from a file
+  exit                                               - Exit the program
 `
 	fmt.Println(guideStyle.Render(guide))
 
@@ -56,6 +59,26 @@ Commands:
 		}
 
 		switch cmd[0] {
+		case "tables":
+			if len(cmd) != 3 {
+				fmt.Println(errorStyle.Render("Usage: tables <url> <schemaName>"))
+			} else {
+				res, err := myClient.ReadAllTables(cmd[1], cmd[2])
+				if err != nil {
+					fmt.Println(errorStyle.Render(fmt.Sprintf("Error reading all tables: [%v]", err)))
+				} else {
+					fmt.Println(successStyle.Render("Getted all tables successfully."))
+					fmt.Println(resStyle.Render(fmt.Sprintf("<%s>", cmd[2])))
+					if res == nil {
+						fmt.Println(resStyle.Render("Nothing tables"))
+					} else {
+						for _, tableName := range res.([]interface{}) {
+							fmt.Println(resStyle.Render(fmt.Sprintf("%s ", tableName.(string))))
+						}
+					}
+				}
+			}
+
 		case "create":
 			if len(cmd) != 5 {
 				fmt.Println(errorStyle.Render("Usage: create <url> <filename> <tablename> <extension>"))
@@ -70,6 +93,19 @@ Commands:
 							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
 						))
 					}
+				}
+			}
+
+		case "read":
+			if len(cmd) != 3 {
+				fmt.Println(errorStyle.Render("Usage: read <url> <tablename>"))
+			} else {
+				res, err := myClient.ReadAllRecord(cmd[1], cmd[2])
+				if err != nil {
+					fmt.Println(errorStyle.Render(fmt.Sprintf("Error reading table: [%v]", err)))
+				} else {
+					fmt.Println(successStyle.Render("Table read successfully."))
+					viewTable(res["data"].([]interface{}))
 				}
 			}
 
@@ -136,4 +172,34 @@ func nextline() []string {
 
 func stringTokenizer(s string) []string {
 	return strings.Split(s, " ")
+}
+
+func viewTable(datas []interface{}) {
+	var columns []string
+	if len(datas) > 0 {
+		for data := range datas[0].(map[string]interface{}) {
+			columns = append(columns, data)
+		}
+	}
+
+	var records [][]string
+	for _, row := range datas {
+		var record []string
+		for _, col := range columns {
+			val := row.(map[string]interface{})[col]
+			if val == nil {
+				record = append(record, "")
+			} else {
+				record = append(record, fmt.Sprintf("%v", val))
+			}
+		}
+		records = append(records, record)
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(columns)
+	for _, record := range records {
+		table.Append(record)
+	}
+	table.Render()
 }

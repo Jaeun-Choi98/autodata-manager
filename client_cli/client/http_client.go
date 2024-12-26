@@ -18,6 +18,96 @@ func NewClient() ClientInterface {
 	return &HttpClient{client: &http.Client{}}
 }
 
+func (hc *HttpClient) ReadAllTables(url, schemaName string) (interface{}, error) {
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// formData: { "schema_name" : schemaName }
+	err := writer.WriteField("schema_name", schemaName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write schema name: %w", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to drop request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := hc.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %s(%v)", resp.Status, response["error"])
+	}
+
+	return response["data"], nil
+}
+
+func (hc *HttpClient) ReadAllRecord(url, tableName string) (map[string]interface{}, error) {
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// formData: { "table_name" : tableName }
+	err := writer.WriteField("table_name", tableName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write table name: %w", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to drop request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := hc.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %s(%v)", resp.Status, response["error"])
+	}
+
+	return response, nil
+}
+
 func (hc *HttpClient) ExportTable(url, tableName, extension string) error {
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)

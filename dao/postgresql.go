@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"log"
 
 	"gorm.io/driver/postgres"
@@ -57,4 +58,15 @@ func (pq *PostgreSQL) ReadAllTableData(tableName string) ([]map[string]interface
 		return nil, err
 	}
 	return rows, nil
+}
+
+func (pq *PostgreSQL) ReadAllTables(schemaName string) ([]string, error) {
+	var tables []string
+	query := fmt.Sprintf("SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'", schemaName)
+	err := pq.db.Raw(query).Scan(&tables).Error
+	if err != nil {
+		log.Printf("failed to 'ReadAllTables' agr(%s)", schemaName)
+		return nil, err
+	}
+	return tables, err
 }

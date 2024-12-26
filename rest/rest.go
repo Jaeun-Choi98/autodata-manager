@@ -27,5 +27,7 @@ func serveWithHandler(addr string, h handler.HandlerInterface) error {
 	r.POST("/service/delete", h.DeleteTable)
 	r.POST("/service/export/json", h.ExportTableJSON)
 	r.POST("/service/export/csv", h.ExportTableCSV)
+	r.POST("/service/read-table-all", h.ReadAllRecordByTableName)
+	r.POST("/service/get-all-tables", h.ReadAllTablesBySchema)
 	return r.Run(addr)
 }

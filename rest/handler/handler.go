@@ -14,6 +14,8 @@ type HandlerInterface interface {
 	DeleteTable(c *gin.Context)
 	ExportTableJSON(c *gin.Context)
 	ExportTableCSV(c *gin.Context)
+	ReadAllRecordByTableName(c *gin.Context)
+	ReadAllTablesBySchema(c *gin.Context)
 	CloseHandler()
 }
 

@@ -7,6 +7,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (h *Handler) ReadAllTablesBySchema(c *gin.Context) {
+	schema_name := c.PostForm("schema_name")
+	if schema_name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "table_name is required"})
+		return
+	}
+	tables, err := h.myService.ReadAllTablesBySchemaNamd(schema_name)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": tables})
+}
+
+func (h *Handler) ReadAllRecordByTableName(c *gin.Context) {
+	tableName := c.PostForm("table_name")
+	if tableName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "table_name is required"})
+		return
+	}
+	records, err := h.myService.ReadAllRecordByTableName(tableName)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": records})
+}
+
 func (h *Handler) CreateTableCSV(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
