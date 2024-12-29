@@ -17,14 +17,16 @@ type HandlerInterface interface {
 	ReadAllRecordByTableName(c *gin.Context)
 	ReadAllTablesBySchema(c *gin.Context)
 	CloseHandler()
+	SubscribeDDLTable(c *gin.Context)
+	UnsubscribeDDLTable(c *gin.Context)
 }
 
 type Handler struct {
 	myService service.ServiceInterface
 }
 
-func NewHandler(dbInfo string) HandlerInterface {
-	sv, _ := service.NewService(dbInfo)
+func NewHandler(dbHost, dbPort, dbPwd, dbName string) HandlerInterface {
+	sv, _ := service.NewService(dbHost, dbPort, dbPwd, dbName)
 	return &Handler{myService: sv}
 }
 

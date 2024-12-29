@@ -7,4 +7,6 @@ type ClientInterface interface {
 	ExportTable(url, tableName, extension string) error
 	ReadAllRecord(url, tableName string) (map[string]interface{}, error)
 	ReadAllTables(url, schemaName string) (interface{}, error)
+	SubscribeDDL(url string) (map[string]interface{}, error)
+	UnsubscribeDDL(url string) (map[string]interface{}, error)
 }

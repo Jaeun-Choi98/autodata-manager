@@ -39,7 +39,9 @@ func main() {
 
 	guide := `
 Commands:
-  tables    <url> <schemaName>                       - Get all tables form schema
+  subscribe <url>                                    - Subscribe DDL 
+  unsubscribe <url>                                  - Unsubscribe DDL
+  tables    <url> <schemaName>                       - Get all tables from schema
   create    <url> <fileName> <tableName> <extension> - Create a table from a file
   delete    <url> <tableName>                        - Delete a table
   read      <url> <tableName>                        - Read a table
@@ -59,6 +61,39 @@ Commands:
 		}
 
 		switch cmd[0] {
+		case "subscribe":
+			if len(cmd) != 2 {
+				fmt.Println(errorStyle.Render("Usage: subscribe <url>"))
+			} else {
+				res, err := myClient.SubscribeDDL(cmd[1])
+				if err != nil {
+					fmt.Println(errorStyle.Render(fmt.Sprintf("Error subscribe [%v]", err)))
+				} else {
+					fmt.Println(successStyle.Render("Subscribed successfully."))
+					for key, val := range res {
+						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
+							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
+						))
+					}
+				}
+			}
+
+		case "unsubscribe":
+			if len(cmd) != 2 {
+				fmt.Println(errorStyle.Render("Usage: unsubscribe <url>"))
+			} else {
+				res, err := myClient.UnsubscribeDDL(cmd[1])
+				if err != nil {
+					fmt.Println(errorStyle.Render(fmt.Sprintf("Error unsubscribe [%v]", err)))
+				} else {
+					fmt.Println(successStyle.Render("Unsubscribed successfully."))
+					for key, val := range res {
+						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
+							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
+						))
+					}
+				}
+			}
 		case "tables":
 			if len(cmd) != 3 {
 				fmt.Println(errorStyle.Render("Usage: tables <url> <schemaName>"))

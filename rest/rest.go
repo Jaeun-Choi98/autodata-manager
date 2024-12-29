@@ -2,7 +2,6 @@ package rest
 
 import (
 	"cju/rest/handler"
-	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -12,8 +11,7 @@ import (
 func Serve(addr string) error {
 	godotenv.Load()
 	dbHost, dbName, dbPwd, dbPort := os.Getenv("DB_HOST"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_PORT")
-	h := handler.NewHandler(fmt.Sprintf("user=postgres dbname=%s password=%s host=%s port=%s sslmode=disable",
-		dbName, dbPwd, dbHost, dbPort))
+	h := handler.NewHandler(dbHost, dbPort, dbPwd, dbName)
 	return serveWithHandler(addr, h)
 }
 
@@ -29,5 +27,7 @@ func serveWithHandler(addr string, h handler.HandlerInterface) error {
 	r.POST("/service/export/csv", h.ExportTableCSV)
 	r.POST("/service/read-table-all", h.ReadAllRecordByTableName)
 	r.POST("/service/get-all-tables", h.ReadAllTablesBySchema)
+	r.GET("/service/subscribe", h.SubscribeDDLTable)
+	r.GET("/service/unsubscribe", h.UnsubscribeDDLTable)
 	return r.Run(addr)
 }

@@ -18,6 +18,58 @@ func NewClient() ClientInterface {
 	return &HttpClient{client: &http.Client{}}
 }
 
+func (hc *HttpClient) UnsubscribeDDL(url string) (map[string]interface{}, error) {
+	resp, err := hc.client.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unsubscribe: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	// 응답 코드 확인
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %v(%v)", resp.Status, response["error"])
+	}
+
+	return response, nil
+}
+
+func (hc *HttpClient) SubscribeDDL(url string) (map[string]interface{}, error) {
+	resp, err := hc.client.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to subscribe: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	// 응답 코드 확인
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %v(%v)", resp.Status, response["error"])
+	}
+
+	return response, nil
+}
+
 func (hc *HttpClient) ReadAllTables(url, schemaName string) (interface{}, error) {
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)

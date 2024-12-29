@@ -7,6 +7,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 권한 검증이 필요할 수도 있음.
+func (h *Handler) SubscribeDDLTable(c *gin.Context) {
+	err := h.myService.GetListenManager().StartListening()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "subscribed successfully"})
+}
+
+// 권한 검증이 필요할 수도 있음.
+func (h *Handler) UnsubscribeDDLTable(c *gin.Context) {
+	err := h.myService.GetListenManager().StopListening()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "unsubscribed successfully"})
+}
+
 func (h *Handler) ReadAllTablesBySchema(c *gin.Context) {
 	schema_name := c.PostForm("schema_name")
 	if schema_name == "" {
@@ -15,7 +35,7 @@ func (h *Handler) ReadAllTablesBySchema(c *gin.Context) {
 	}
 	tables, err := h.myService.ReadAllTablesBySchemaNamd(schema_name)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": tables})
@@ -29,7 +49,7 @@ func (h *Handler) ReadAllRecordByTableName(c *gin.Context) {
 	}
 	records, err := h.myService.ReadAllRecordByTableName(tableName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": records})
