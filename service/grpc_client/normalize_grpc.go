@@ -1,4 +1,4 @@
-package grpc
+package grpc_client
 
 import (
 	"cju/proto/v1/normalize"

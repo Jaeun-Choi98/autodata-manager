@@ -1,7 +1,7 @@
 package service
 
 import (
-	"cju/service/grpc"
+	"cju/service/grpc_client"
 	"encoding/csv"
 	"fmt"
 	"log"
@@ -37,7 +37,7 @@ func (s *Service) CreateNormalizeTableFromCSV(filePath string) (string, error) {
 		2. ai를 사용하여 정규화된 스키마와 데이터를 얻음.
 		어떤 것이 좋을지 생각해 봐야함.
 	*/
-	resp := grpc.NormalizeByOpenAI(reqData.String())
+	resp := grpc_client.NormalizeByOpenAI(reqData.String())
 	if resp == "" {
 		log.Printf("failed to normalize '%s' file by using grpc", filePath)
 		return "", fmt.Errorf("failed to normalize '%s' file by using grpc", filePath)
