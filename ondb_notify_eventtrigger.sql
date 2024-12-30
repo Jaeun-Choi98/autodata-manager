@@ -19,11 +19,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- DROP by DDL COMMAND의 처리는 따로 설정해줘야함. pg_event_trigger_ddl_commands에 찍히지 않음.
--- 참고 문서(https://www.postgresql.org/docs/current/functions-event-triggers.html#PG-EVENT-TRIGGER-DDL-COMMAND-END-FUNCTIONS)
 CREATE EVENT TRIGGER table_ddl_trigger
 ON ddl_command_end
 EXECUTE FUNCTION notify_ddl_trigger();
+
+-- DROP by DDL COMMAND의 처리는 따로 설정해줘야함. pg_event_trigger_ddl_commands에 찍히지 않음.
+-- 참고 문서(https://www.postgresql.org/docs/current/functions-event-triggers.html#PG-EVENT-TRIGGER-DDL-COMMAND-END-FUNCTIONS)
 
 CREATE OR REPLACE FUNCTION notify_dropped_trigger()
 RETURNS event_trigger AS $$

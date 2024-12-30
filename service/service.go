@@ -17,12 +17,13 @@ type ServiceInterface interface {
 	CreateNormalizeTableFromCSV(filePath string) (string, error)
 	ReadAllRecordByTableName(tableName string) ([]map[string]interface{}, error)
 	ReadAllTablesBySchemaNamd(schemaName string) ([]string, error)
-	GetListenManager() *ListenerManager
+	StartListenerManager() error
+	StopListenerManager() error
 }
 
 type Service struct {
 	mydb dao.DaoInterface
-	mylm *ListenerManager
+	mylm ListenerManagerInterface
 }
 
 func NewService(dbHost, dbPort, dbPwd, dbName string) (ServiceInterface, error) {
@@ -51,8 +52,4 @@ func (s *Service) CloseService() error {
 		return err
 	}
 	return nil
-}
-
-func (s *Service) GetListenManager() *ListenerManager {
-	return s.mylm
 }

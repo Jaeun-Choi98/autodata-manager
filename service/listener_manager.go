@@ -9,6 +9,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type ListenerManagerInterface interface {
+	StartListening() error
+	StopListening() error
+	Close() error
+}
+
 type ListenerManager struct {
 	conn             *pgx.Conn
 	stopListening    chan bool
