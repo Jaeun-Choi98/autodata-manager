@@ -1,6 +1,7 @@
 package service
 
 import (
+	"cju/service/grpc_client"
 	"context"
 	"fmt"
 	"log"
@@ -74,8 +75,8 @@ func (lm *ListenerManager) listenLoop() {
 
 	fmt.Println("Listening for table change event...")
 	go func() {
+		defer notificationWaitGroup.Done()
 		for {
-			defer notificationWaitGroup.Done()
 			notification, err := lm.conn.WaitForNotification(ctx)
 			if err != nil {
 				if ctx.Err() != nil {
@@ -104,7 +105,8 @@ func (lm *ListenerManager) listenLoop() {
 			return
 		case payload := <-lm.notificationChan:
 			fmt.Printf("Received notification: %s\n", payload)
-			// 이후 메시지 알람 기능 구현현
+			// 이후 메시지 알람 기능 구현
+			go grpc_client.PublishToMOM("table_events", payload)
 		}
 	}
 }
