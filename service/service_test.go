@@ -99,3 +99,15 @@ func TestListenerManager(t *testing.T) {
 		assert.NoError(t, err, "Should close the connection without error")
 	})
 }
+
+func TestBackupDatabase(t *testing.T) {
+	godotenv.Load("../.env")
+	dbHost, dbName, dbPwd, dbPort := os.Getenv("DB_HOST"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_PORT")
+	service, err := NewService(dbHost, dbPort, dbPwd, dbName)
+	if err != nil {
+		log.Println("NewService method err")
+		return
+	}
+	err = service.BackupDatabase("test")
+	assert.NoError(t, err, "asdf")
+}

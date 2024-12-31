@@ -1,11 +1,59 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+func (h *Handler) BackupDB(c *gin.Context) {
+	dbName := c.PostForm("db_name")
+	err := h.myService.BackupDatabase(dbName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "successful"})
+}
+
+func (h *Handler) CronBackupDB(c *gin.Context) {
+	dbName, respQuery := c.PostForm("db_name"), c.PostForm("query")
+	var mapQuery map[string]interface{}
+	json.Unmarshal([]byte(respQuery), &mapQuery)
+	var query []string
+	for _, str := range mapQuery["data"].([]interface{}) {
+		query = append(query, str.(string))
+	}
+	err := h.myService.CronBackupDataBase(dbName, query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "successful"})
+}
+
+func (h *Handler) RemoveCronJob(c *gin.Context) {
+	id := c.PostForm("job_id")
+	h.myService.RemoveCronJob(id)
+	c.JSON(http.StatusOK, gin.H{"message": "successful"})
+}
+
+func (h *Handler) GetJobList(c *gin.Context) {
+	jobs := h.myService.GetJobList()
+	c.JSON(http.StatusOK, jobs)
+}
+
+func (h *Handler) CronStart(c *gin.Context) {
+	h.myService.CronStart()
+	c.Done()
+}
+
+func (h *Handler) CronStop(c *gin.Context) {
+	h.myService.CronStop()
+	c.Done()
+}
 
 // 권한 검증이 필요할 수도 있음.
 func (h *Handler) SubscribeDDLTable(c *gin.Context) {
@@ -38,7 +86,7 @@ func (h *Handler) ReadAllTablesBySchema(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": tables})
+	c.JSON(http.StatusOK, gin.H{"data": map[string][]string{schema_name: tables}})
 }
 
 func (h *Handler) ReadAllRecordByTableName(c *gin.Context) {

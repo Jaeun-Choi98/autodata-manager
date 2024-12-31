@@ -1,12 +1,15 @@
 package client
 
 type ClientInterface interface {
-	MakeTable(url, filePath, tableName, extension string) (map[string]interface{}, error)
-	NormalizeTable(url, filePath, extension string) (map[string]interface{}, error)
-	DropTable(url, tableName string) (map[string]interface{}, error)
-	ExportTable(url, tableName, extension string) error
-	ReadAllRecord(url, tableName string) (map[string]interface{}, error)
-	ReadAllTables(url, schemaName string) (interface{}, error)
-	SubscribeDDL(url string) (map[string]interface{}, error)
-	UnsubscribeDDL(url string) (map[string]interface{}, error)
+	MakeTable(filePath, tableName, extension string) (map[string]interface{}, error)
+	NormalizeTable(filePath, extension string) (map[string]interface{}, error)
+	DropTable(tableName string) (map[string]interface{}, error)
+	ExportTable(tableName, extension string) error
+	ReadAllRecord(tableName string) (map[string]interface{}, error)
+	ReadAllTables(schemaName string) (interface{}, error)
+	SubscribeDDL() (map[string]interface{}, error)
+	UnsubscribeDDL() (map[string]interface{}, error)
+	CronCommand(param, jobId string) (map[string]interface{}, error)
+	BackupDB(dbName string) (map[string]interface{}, error)
+	CronBackupDB(dbName string, query []string) (map[string]interface{}, error)
 }

@@ -1,0 +1,102 @@
+[
+  {
+    "productcategory": "Electronics",
+    "productid": "1",
+    "productname": "Laptop"
+  },
+  {
+    "productcategory": "Electronics",
+    "productid": "2",
+    "productname": "Smartphone"
+  },
+  {
+    "productcategory": "Accessories",
+    "productid": "3",
+    "productname": "Mouse"
+  },
+  {
+    "productcategory": "Furniture",
+    "productid": "4",
+    "productname": "Desk Chair"
+  },
+  {
+    "productcategory": "Accessories",
+    "productid": "5",
+    "productname": "Keyboard"
+  },
+  {
+    "productcategory": "Electronics",
+    "productid": "6",
+    "productname": "Monitor"
+  },
+  {
+    "productcategory": "Books",
+    "productid": "7",
+    "productname": "Book"
+  },
+  {
+    "productcategory": "Accessories",
+    "productid": "8",
+    "productname": "USB Cable"
+  },
+  {
+    "productcategory": "Furniture",
+    "productid": "9",
+    "productname": "Table"
+  },
+  {
+    "productcategory": "Accessories",
+    "productid": "10",
+    "productname": "Laptop Bag"
+  },
+  {
+    "productcategory": "Stationery",
+    "productid": "11",
+    "productname": "Notebook"
+  },
+  {
+    "productcategory": "Stationery",
+    "productid": "12",
+    "productname": "Pen"
+  },
+  {
+    "productcategory": "Electronics",
+    "productid": "13",
+    "productname": "Headphones"
+  },
+  {
+    "productcategory": "Furniture",
+    "productid": "14",
+    "productname": "Lamp"
+  },
+  {
+    "productcategory": "Electronics",
+    "productid": "15",
+    "productname": "Power Bank"
+  },
+  {
+    "productcategory": "Accessories",
+    "productid": "16",
+    "productname": "Backpack"
+  },
+  {
+    "productcategory": "Electronics",
+    "productid": "17",
+    "productname": "Tablet"
+  },
+  {
+    "productcategory": "Kitchenware",
+    "productid": "18",
+    "productname": "Coffee Mug"
+  },
+  {
+    "productcategory": "Furniture",
+    "productid": "19",
+    "productname": "Sofa"
+  },
+  {
+    "productcategory": "Stationery",
+    "productid": "20",
+    "productname": "Eraser"
+  }
+]

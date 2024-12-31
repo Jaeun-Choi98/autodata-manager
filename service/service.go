@@ -19,11 +19,18 @@ type ServiceInterface interface {
 	ReadAllTablesBySchemaNamd(schemaName string) ([]string, error)
 	StartListenerManager() error
 	StopListenerManager() error
+	BackupDatabase(dbName string) error
+	CronBackupDataBase(dbName string, query []string) error
+	RemoveCronJob(id string)
+	GetJobList() map[string]string
+	CronStart()
+	CronStop()
 }
 
 type Service struct {
-	mydb dao.DaoInterface
-	mylm ListenerManagerInterface
+	mydb   dao.DaoInterface
+	mylm   ListenerManagerInterface
+	mycron *CronManager
 }
 
 func NewService(dbHost, dbPort, dbPwd, dbName string) (ServiceInterface, error) {
@@ -36,9 +43,9 @@ func NewService(dbHost, dbPort, dbPwd, dbName string) (ServiceInterface, error) 
 	lmCon := fmt.Sprintf("postgres://postgres:%s@%s:%s/%s", dbPwd, dbHost, dbPort, dbName)
 	lm, err := NewListenManager(lmCon)
 	if err != nil {
-		return &Service{mydb: db}, nil
+		return &Service{mydb: db, mylm: nil, mycron: NewCronInstance()}, nil
 	}
-	return &Service{mydb: db, mylm: lm}, nil
+	return &Service{mydb: db, mylm: lm, mycron: NewCronInstance()}, nil
 }
 
 func (s *Service) CloseService() error {
@@ -51,5 +58,6 @@ func (s *Service) CloseService() error {
 	if err != nil {
 		return err
 	}
+	s.mycron.StopCron()
 	return nil
 }

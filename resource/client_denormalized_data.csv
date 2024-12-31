@@ -1,0 +1,21 @@
+OrderID,CustomerName,CustomerAddress,ProductName,ProductCategory,Quantity,Price,OrderDate
+1,Alice Kim,"Seoul, South Korea",Laptop,Electronics,1,1200,2024-12-01
+2,Bob Lee,"Busan, South Korea",Smartphone,Electronics,2,800,2024-12-02
+3,Alice Kim,"Seoul, South Korea",Mouse,Accessories,1,25,2024-12-01
+4,Charlie Park,"Daegu, South Korea",Desk Chair,Furniture,1,150,2024-12-03
+5,Alice Kim,"Seoul, South Korea",Keyboard,Accessories,1,45,2024-12-01
+6,Bob Lee,"Busan, South Korea",Monitor,Electronics,1,300,2024-12-02
+7,David Choi,"Incheon, South Korea",Book,Books,3,30,2024-12-04
+8,Alice Kim,"Seoul, South Korea",USB Cable,Accessories,2,10,2024-12-01
+9,Charlie Park,"Daegu, South Korea",Table,Furniture,1,200,2024-12-03
+10,Bob Lee,"Busan, South Korea",Laptop Bag,Accessories,1,50,2024-12-02
+11,David Choi,"Incheon, South Korea",Notebook,Stationery,5,15,2024-12-04
+12,Alice Kim,"Seoul, South Korea",Pen,Stationery,10,5,2024-12-01
+13,Bob Lee,"Busan, South Korea",Headphones,Electronics,1,100,2024-12-02
+14,Charlie Park,"Daegu, South Korea",Lamp,Furniture,2,60,2024-12-03
+15,Alice Kim,"Seoul, South Korea",Power Bank,Electronics,1,40,2024-12-01
+16,David Choi,"Incheon, South Korea",Backpack,Accessories,1,70,2024-12-04
+17,Bob Lee,"Busan, South Korea",Tablet,Electronics,1,500,2024-12-02
+18,Alice Kim,"Seoul, South Korea",Coffee Mug,Kitchenware,2,20,2024-12-01
+19,Charlie Park,"Daegu, South Korea",Sofa,Furniture,1,800,2024-12-03
+20,David Choi,"Incheon, South Korea",Eraser,Stationery,10,2,2024-12-04

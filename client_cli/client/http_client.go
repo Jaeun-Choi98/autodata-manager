@@ -11,14 +11,186 @@ import (
 )
 
 type HttpClient struct {
-	client *http.Client
+	client  *http.Client
+	baseUrl string
 }
 
 func NewClient() ClientInterface {
-	return &HttpClient{client: &http.Client{}}
+	return &HttpClient{client: &http.Client{}, baseUrl: "http://localhost:8080/service"}
 }
 
-func (hc *HttpClient) UnsubscribeDDL(url string) (map[string]interface{}, error) {
+func (hc *HttpClient) CronBackupDB(dbName string, query []string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/backup/cron", hc.baseUrl)
+
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// formData: { "db_name" : dbName, "query": query }
+	err := writer.WriteField("db_name", dbName)
+	jsonQuery := map[string][]string{}
+	jsonQuery["data"] = query
+	jsonQueryData, _ := json.Marshal(jsonQuery)
+	writer.WriteField("query", string(jsonQueryData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to write db name: %w", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to backup request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := hc.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %s(%v)", resp.Status, response["error"])
+	}
+
+	return response, nil
+}
+
+func (hc *HttpClient) BackupDB(dbName string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/backup/database", hc.baseUrl)
+
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// formData: { "db_name" : dbName }
+	err := writer.WriteField("db_name", dbName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write db name: %w", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to backup request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := hc.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %s(%v)", resp.Status, response["error"])
+	}
+
+	return response, nil
+}
+
+func (hc *HttpClient) CronCommand(param, jobId string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/cron/%s", hc.baseUrl, param)
+	switch param {
+	case "start":
+		resp, _ := hc.client.Get(url)
+		defer resp.Body.Close()
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+		}
+		return nil, nil
+	case "stop":
+		resp, _ := hc.client.Get(url)
+		defer resp.Body.Close()
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+		}
+		return nil, nil
+	case "jobs":
+		resp, _ := hc.client.Get(url)
+		defer resp.Body.Close()
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+		}
+		var response map[string]interface{}
+		decoder := json.NewDecoder(resp.Body)
+		err := decoder.Decode(&response)
+		if err != nil {
+			return response, fmt.Errorf("failed to decode JSON response: %w", err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			return response, fmt.Errorf("received non-OK response: %v(%v)", resp.Status, response["error"])
+		}
+		return response, nil
+	case "remove":
+		var requestBody bytes.Buffer
+		writer := multipart.NewWriter(&requestBody)
+
+		// formData: { "job_id" : jobId }
+		err := writer.WriteField("job_id", jobId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to write schema name: %w", err)
+		}
+
+		err = writer.Close()
+		if err != nil {
+			return nil, fmt.Errorf("failed to close writer: %w", err)
+		}
+
+		req, err := http.NewRequest("POST", url, &requestBody)
+		if err != nil {
+			return nil, fmt.Errorf("failed to drop request: %w", err)
+		}
+
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+
+		resp, err := hc.client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("failed to send request: %w", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+		}
+		return nil, nil
+	default:
+		return nil, fmt.Errorf("'%s' is not cron command", param)
+	}
+}
+
+func (hc *HttpClient) UnsubscribeDDL() (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/unsubscribe", hc.baseUrl)
 	resp, err := hc.client.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unsubscribe: %v", err)
@@ -44,7 +216,8 @@ func (hc *HttpClient) UnsubscribeDDL(url string) (map[string]interface{}, error)
 	return response, nil
 }
 
-func (hc *HttpClient) SubscribeDDL(url string) (map[string]interface{}, error) {
+func (hc *HttpClient) SubscribeDDL() (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/subscribe", hc.baseUrl)
 	resp, err := hc.client.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to subscribe: %v", err)
@@ -70,7 +243,7 @@ func (hc *HttpClient) SubscribeDDL(url string) (map[string]interface{}, error) {
 	return response, nil
 }
 
-func (hc *HttpClient) ReadAllTables(url, schemaName string) (interface{}, error) {
+func (hc *HttpClient) ReadAllTables(schemaName string) (interface{}, error) {
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 
@@ -85,6 +258,7 @@ func (hc *HttpClient) ReadAllTables(url, schemaName string) (interface{}, error)
 		return nil, fmt.Errorf("failed to close writer: %w", err)
 	}
 
+	url := fmt.Sprintf("%s/get-all-tables", hc.baseUrl)
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to drop request: %w", err)
@@ -115,7 +289,7 @@ func (hc *HttpClient) ReadAllTables(url, schemaName string) (interface{}, error)
 	return response["data"], nil
 }
 
-func (hc *HttpClient) ReadAllRecord(url, tableName string) (map[string]interface{}, error) {
+func (hc *HttpClient) ReadAllRecord(tableName string) (map[string]interface{}, error) {
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 
@@ -130,6 +304,7 @@ func (hc *HttpClient) ReadAllRecord(url, tableName string) (map[string]interface
 		return nil, fmt.Errorf("failed to close writer: %w", err)
 	}
 
+	url := fmt.Sprintf("%s/read-table-all", hc.baseUrl)
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to drop request: %w", err)
@@ -160,7 +335,7 @@ func (hc *HttpClient) ReadAllRecord(url, tableName string) (map[string]interface
 	return response, nil
 }
 
-func (hc *HttpClient) ExportTable(url, tableName, extension string) error {
+func (hc *HttpClient) ExportTable(tableName, extension string) error {
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 
@@ -174,8 +349,7 @@ func (hc *HttpClient) ExportTable(url, tableName, extension string) error {
 	if err != nil {
 		return fmt.Errorf("failed to close writer: %w", err)
 	}
-
-	url = fmt.Sprintf("%s/%s", url, extension)
+	url := fmt.Sprintf("%s/export/%s", hc.baseUrl, extension)
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
 		return fmt.Errorf("failed to export request: %w", err)
@@ -211,7 +385,7 @@ func (hc *HttpClient) ExportTable(url, tableName, extension string) error {
 	return nil
 }
 
-func (hc *HttpClient) DropTable(url, tableName string) (map[string]interface{}, error) {
+func (hc *HttpClient) DropTable(tableName string) (map[string]interface{}, error) {
 
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
@@ -226,6 +400,7 @@ func (hc *HttpClient) DropTable(url, tableName string) (map[string]interface{}, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to close writer: %w", err)
 	}
+	url := fmt.Sprintf("%s/delete", hc.baseUrl)
 
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
@@ -258,7 +433,7 @@ func (hc *HttpClient) DropTable(url, tableName string) (map[string]interface{}, 
 	return response, nil
 }
 
-func (hc *HttpClient) NormalizeTable(url, filePath, extension string) (map[string]interface{}, error) {
+func (hc *HttpClient) NormalizeTable(filePath, extension string) (map[string]interface{}, error) {
 
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
@@ -284,8 +459,7 @@ func (hc *HttpClient) NormalizeTable(url, filePath, extension string) (map[strin
 	if err != nil {
 		return nil, fmt.Errorf("failed to close writer: %w", err)
 	}
-
-	url = fmt.Sprintf("%s/%s", url, extension)
+	url := fmt.Sprintf("%s/create/normalize/%s", hc.baseUrl, extension)
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -317,7 +491,7 @@ func (hc *HttpClient) NormalizeTable(url, filePath, extension string) (map[strin
 	return response, nil
 }
 
-func (hc *HttpClient) MakeTable(url, filePath, tableName, extension string) (map[string]interface{}, error) {
+func (hc *HttpClient) MakeTable(filePath, tableName, extension string) (map[string]interface{}, error) {
 
 	// 요청 본문을 작성할 버퍼
 	var requestBody bytes.Buffer
@@ -357,7 +531,7 @@ func (hc *HttpClient) MakeTable(url, filePath, tableName, extension string) (map
 	}
 
 	// e.g., http://localhost:8080/service/create/csv
-	url = fmt.Sprintf("%s/%s", url, extension)
+	url := fmt.Sprintf("%s/create/%s", hc.baseUrl, extension)
 	// HTTP POST 요청 보내기
 	req, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {

@@ -19,6 +19,13 @@ type HandlerInterface interface {
 	CloseHandler()
 	SubscribeDDLTable(c *gin.Context)
 	UnsubscribeDDLTable(c *gin.Context)
+
+	BackupDB(c *gin.Context)
+	CronBackupDB(c *gin.Context)
+	RemoveCronJob(c *gin.Context)
+	GetJobList(c *gin.Context)
+	CronStart(c *gin.Context)
+	CronStop(c *gin.Context)
 }
 
 type Handler struct {

@@ -28,8 +28,8 @@ func SubscribeToMOM(ctx context.Context, topic string, msgToApp chan map[string]
 
 	fmt.Printf("subscribed to topic: %s\n", topic)
 
-	msgChan := make(chan *pb.SubscribeResponse)
-	errChan := make(chan error)
+	msgChan := make(chan *pb.SubscribeResponse, 10)
+	errChan := make(chan error, 10)
 	defer func() {
 		close(msgChan)
 		close(errChan)

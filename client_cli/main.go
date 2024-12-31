@@ -17,38 +17,28 @@ var (
 )
 
 func main() {
-	// Guide 스타일
-	guideStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FF5733"))
-
-	// 성공 스타일
-	successStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#00FF00"))
-
-	// 에러 스타일
-	errorStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FF0000"))
-
-	// 결과 스타일
-	resStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FFFFFF"))
+	// 스타일 정의
+	guideStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FF5733"))
+	successStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#00FF00"))
+	errorStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FF0000"))
+	resStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF"))
 
 	guide := `
 Commands:
-  subscribe <url>                                    - Subscribe DDL 
-  unsubscribe <url>                                  - Unsubscribe DDL
-  tables    <url> <schemaName>                       - Get all tables from schema
-  create    <url> <fileName> <tableName> <extension> - Create a table from a file
-  delete    <url> <tableName>                        - Delete a table
-  read      <url> <tableName>                        - Read a table
-  export    <url> <tableName> <extension>            - Export a table
-  normalize <url> <fileName> <extension>             - Normalize a table from a file
-  exit                                               - Exit the program
+	cron <option> [start | stop | remove <jobId> | jobs]   - Manage cron jobs
+	backup <dbName>                                        - Backup a database
+	cronbackup <dbName> <cronQuery>                        - Set up cron backup with a query
+	subscribe                                              - Subscribe to DDL changes
+	unsubscribe                                            - Unsubscribe from DDL changes
+	tables <schemaName>                                    - List all tables in a schema
+	create <fileName> <tableName> <extension>              - Create a table from a file
+	delete <tableName>                                     - Delete a table
+	read <tableName>                                       - Read data from a table
+	export <tableName> <extension>                         - Export a table to a file
+	normalize <fileName> <extension>                       - Normalize a table from a file
+	exit                                                   - Exit the program
 `
+
 	fmt.Println(guideStyle.Render(guide))
 
 	for {
@@ -61,142 +51,229 @@ Commands:
 		}
 
 		switch cmd[0] {
+		case "cronbackup":
+			handleCronBackup(cmd, successStyle, errorStyle, resStyle)
+		case "backup":
+			handleBackup(cmd, successStyle, errorStyle, resStyle)
+		case "cron":
+			handleCronCommand(cmd, successStyle, errorStyle, resStyle)
 		case "subscribe":
-			if len(cmd) != 2 {
-				fmt.Println(errorStyle.Render("Usage: subscribe <url>"))
-			} else {
-				res, err := myClient.SubscribeDDL(cmd[1])
-				if err != nil {
-					fmt.Println(errorStyle.Render(fmt.Sprintf("Error subscribe [%v]", err)))
-				} else {
-					fmt.Println(successStyle.Render("Subscribed successfully."))
-					for key, val := range res {
-						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
-							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
-						))
-					}
-				}
-			}
-
+			handleSubscribe(cmd, successStyle, errorStyle, resStyle)
 		case "unsubscribe":
-			if len(cmd) != 2 {
-				fmt.Println(errorStyle.Render("Usage: unsubscribe <url>"))
-			} else {
-				res, err := myClient.UnsubscribeDDL(cmd[1])
-				if err != nil {
-					fmt.Println(errorStyle.Render(fmt.Sprintf("Error unsubscribe [%v]", err)))
-				} else {
-					fmt.Println(successStyle.Render("Unsubscribed successfully."))
-					for key, val := range res {
-						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
-							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
-						))
-					}
-				}
-			}
+			handleUnsubscribe(cmd, successStyle, errorStyle, resStyle)
 		case "tables":
-			if len(cmd) != 3 {
-				fmt.Println(errorStyle.Render("Usage: tables <url> <schemaName>"))
-			} else {
-				res, err := myClient.ReadAllTables(cmd[1], cmd[2])
-				if err != nil {
-					fmt.Println(errorStyle.Render(fmt.Sprintf("Error reading all tables: [%v]", err)))
-				} else {
-					fmt.Println(successStyle.Render("Getted all tables successfully."))
-					fmt.Println(resStyle.Render(fmt.Sprintf("<%s>", cmd[2])))
-					if res == nil {
-						fmt.Println(resStyle.Render("Nothing tables"))
-					} else {
-						for _, tableName := range res.([]interface{}) {
-							fmt.Println(resStyle.Render(fmt.Sprintf("%s ", tableName.(string))))
-						}
-					}
-				}
-			}
-
+			handleTables(cmd, successStyle, errorStyle, resStyle)
 		case "create":
-			if len(cmd) != 5 {
-				fmt.Println(errorStyle.Render("Usage: create <url> <filename> <tablename> <extension>"))
-			} else {
-				res, err := myClient.MakeTable(cmd[1], cmd[2], cmd[3], cmd[4])
-				if err != nil {
-					fmt.Println(errorStyle.Render(fmt.Sprintf("Error creating table [%v]", err)))
-				} else {
-					fmt.Println(successStyle.Render("Table created successfully."))
-					for key, val := range res {
-						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
-							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
-						))
-					}
-				}
-			}
-
+			handleCreate(cmd, successStyle, errorStyle, resStyle)
 		case "read":
-			if len(cmd) != 3 {
-				fmt.Println(errorStyle.Render("Usage: read <url> <tablename>"))
-			} else {
-				res, err := myClient.ReadAllRecord(cmd[1], cmd[2])
-				if err != nil {
-					fmt.Println(errorStyle.Render(fmt.Sprintf("Error reading table: [%v]", err)))
-				} else {
-					fmt.Println(successStyle.Render("Table read successfully."))
-					viewTable(res["data"].([]interface{}))
-				}
-			}
-
+			handleRead(cmd, successStyle, errorStyle, resStyle)
 		case "delete":
-			if len(cmd) != 3 {
-				fmt.Println(errorStyle.Render("Usage: delete <url> <tablename>"))
-			} else {
-				res, err := myClient.DropTable(cmd[1], cmd[2])
-				if err != nil {
-					fmt.Println(errorStyle.Render(fmt.Sprintf("Error deleting table: [%v]", err)))
-				} else {
-					fmt.Println(successStyle.Render("Table deleted successfully."))
-					for key, val := range res {
-						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
-							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
-						))
-					}
-				}
-			}
-
+			handleDelete(cmd, successStyle, errorStyle, resStyle)
 		case "export":
-			if len(cmd) != 4 {
-				fmt.Println(errorStyle.Render("Usage: export <url> <tablename> <extension>"))
-			} else {
-				err := myClient.ExportTable(cmd[1], cmd[2], cmd[3])
-				if err != nil {
-					fmt.Println(errorStyle.Render(fmt.Sprintf("Error exporting table: [%v]", err)))
-				} else {
-					fmt.Println(successStyle.Render(fmt.Sprintf("Table exported successfully. (%s.%s)", cmd[2], cmd[3])))
-				}
-			}
-
+			handleExport(cmd, successStyle, errorStyle, resStyle)
 		case "normalize":
-			if len(cmd) != 4 {
-				fmt.Println(errorStyle.Render("Usage: normalize <url> <filename> <extension>"))
-			} else {
-				res, err := myClient.NormalizeTable(cmd[1], cmd[2], cmd[3])
-				if err != nil {
-					fmt.Println(errorStyle.Render(fmt.Sprintf("Error normalizing table: [%v]", err)))
-				} else {
-					fmt.Println(successStyle.Render("Table normalized successfully."))
-					for key, val := range res {
-						fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
-							resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
-						))
-					}
-				}
-			}
-
+			handleNormalize(cmd, successStyle, errorStyle, resStyle)
 		case "exit":
 			fmt.Println(successStyle.Render("Exiting the program. Goodbye!"))
 			return
-
 		default:
 			fmt.Println(errorStyle.Render("Invalid command. Please try again."))
 		}
+	}
+}
+
+// 각 명령어 처리 함수들
+
+func handleCronBackup(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 7 {
+		fmt.Println(errorStyle.Render("Usage: cronbackup <dbName> <cronQuery>"))
+		return
+	}
+
+	query := cmd[2:7]
+	res, err := myClient.CronBackupDB(cmd[1], query)
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleBackup(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 2 {
+		fmt.Println(errorStyle.Render("Usage: backup <dbName>"))
+		return
+	}
+
+	res, err := myClient.BackupDB(cmd[1])
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleCronCommand(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 2 {
+		fmt.Println(errorStyle.Render("Usage: cron <option> [start | stop | remove <jobId> | jobs]"))
+		return
+	}
+
+	switch cmd[1] {
+	case "remove":
+		if len(cmd) < 3 {
+			fmt.Println(errorStyle.Render("Usage: cron remove <jobId>"))
+			return
+		}
+		res, err := myClient.CronCommand(cmd[1], cmd[2])
+		handleResponse(res, err, successStyle, errorStyle, resStyle)
+
+	case "jobs":
+		res, err := myClient.CronCommand(cmd[1], "")
+		handleResponse(res, err, successStyle, errorStyle, resStyle)
+
+	default:
+		_, err := myClient.CronCommand(cmd[1], "")
+		if err != nil {
+			fmt.Println(errorStyle.Render(fmt.Sprintf("Error: [%v]", err)))
+		} else {
+			fmt.Println(successStyle.Render("Operation completed successfully."))
+		}
+	}
+}
+
+func handleSubscribe(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 1 {
+		fmt.Println(errorStyle.Render("Usage: subscribe"))
+		return
+	}
+
+	res, err := myClient.SubscribeDDL()
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleUnsubscribe(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 1 {
+		fmt.Println(errorStyle.Render("Usage: unsubscribe"))
+		return
+	}
+
+	res, err := myClient.UnsubscribeDDL()
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleTables(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 2 {
+		fmt.Println(errorStyle.Render("Usage: tables <schemaName>"))
+		return
+	}
+
+	res, err := myClient.ReadAllTables(cmd[1])
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleCreate(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 4 {
+		fmt.Println(errorStyle.Render("Usage: create <fileName> <tableName> <extension>"))
+		return
+	}
+
+	res, err := myClient.MakeTable(cmd[1], cmd[2], cmd[3])
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleRead(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 2 {
+		fmt.Println(errorStyle.Render("Usage: read <tableName>"))
+		return
+	}
+
+	res, err := myClient.ReadAllRecord(cmd[1])
+	if err != nil {
+		fmt.Println(errorStyle.Render(fmt.Sprintf("Error reading table: [%v]", err)))
+	} else {
+		printTableResponse(res["data"].([]interface{}), successStyle, resStyle)
+	}
+}
+
+func handleDelete(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 2 {
+		fmt.Println(errorStyle.Render("Usage: delete <tableName>"))
+		return
+	}
+
+	res, err := myClient.DropTable(cmd[1])
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleExport(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 3 {
+		fmt.Println(errorStyle.Render("Usage: export <tableName> <extension>"))
+		return
+	}
+
+	err := myClient.ExportTable(cmd[1], cmd[2])
+	if err != nil {
+		fmt.Println(errorStyle.Render(fmt.Sprintf("Error exporting table: [%v]", err)))
+	} else {
+		fmt.Println(successStyle.Render(fmt.Sprintf("Table exported successfully. (%s.%s)", cmd[1], cmd[2])))
+	}
+}
+
+func handleNormalize(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) != 3 {
+		fmt.Println(errorStyle.Render("Usage: normalize <fileName> <extension>"))
+		return
+	}
+
+	res, err := myClient.NormalizeTable(cmd[1], cmd[2])
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+// 공통 응답 처리 함수
+func handleResponse(res interface{}, err error, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if err != nil {
+		fmt.Println(errorStyle.Render(fmt.Sprintf("Error: [%v]", err)))
+	} else {
+		printSuccessResponse(res, successStyle, resStyle)
+	}
+}
+
+// 결과 출력 함수
+func printSuccessResponse(res interface{}, successStyle, resStyle lipgloss.Style) {
+	fmt.Println(successStyle.Render("Operation completed successfully."))
+	for key, val := range res.(map[string]interface{}) {
+		fmt.Println(lipgloss.JoinHorizontal(lipgloss.Top,
+			resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
+		))
+	}
+}
+
+// 테이블 출력 함수
+func printTableResponse(datas []interface{}, successStyle, resStyle lipgloss.Style) {
+	fmt.Println(successStyle.Render("Operation completed successfully."))
+	if datas == nil {
+		fmt.Println(resStyle.Render("No tables found"))
+	} else {
+		var columns []string
+		if len(datas) > 0 {
+			for data := range datas[0].(map[string]interface{}) {
+				columns = append(columns, data)
+			}
+		}
+
+		var records [][]string
+		for _, row := range datas {
+			var record []string
+			for _, col := range columns {
+				val := row.(map[string]interface{})[col]
+				if val == nil {
+					record = append(record, "")
+				} else {
+					record = append(record, fmt.Sprintf("%v", val))
+				}
+			}
+			records = append(records, record)
+		}
+
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader(columns)
+		for _, record := range records {
+			table.Append(record)
+		}
+		table.Render()
 	}
 }
 
@@ -207,34 +284,4 @@ func nextline() []string {
 
 func stringTokenizer(s string) []string {
 	return strings.Split(s, " ")
-}
-
-func viewTable(datas []interface{}) {
-	var columns []string
-	if len(datas) > 0 {
-		for data := range datas[0].(map[string]interface{}) {
-			columns = append(columns, data)
-		}
-	}
-
-	var records [][]string
-	for _, row := range datas {
-		var record []string
-		for _, col := range columns {
-			val := row.(map[string]interface{})[col]
-			if val == nil {
-				record = append(record, "")
-			} else {
-				record = append(record, fmt.Sprintf("%v", val))
-			}
-		}
-		records = append(records, record)
-	}
-
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(columns)
-	for _, record := range records {
-		table.Append(record)
-	}
-	table.Render()
 }
