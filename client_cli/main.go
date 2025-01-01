@@ -28,8 +28,8 @@ Commands:
 	cron <option> [start | stop | remove <jobId> | jobs]   - Manage cron jobs
 	backup <dbName>                                        - Backup a database
 	cronbackup <dbName> <cronQuery>                        - Set up cron backup with a query
-	listen                                                 - Subscribe to DDL changes
-	unlisten                                               - Unsubscribe from DDL changes
+	listen                                                 - Listen to DDL changes
+	unlisten                                               - Unlisten from DDL changes
 	tables <schemaName>                                    - List all tables in a schema
 	create <fileName> <tableName> <extension>              - Create a table from a file
 	delete <tableName>                                     - Delete a table
