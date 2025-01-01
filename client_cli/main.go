@@ -28,8 +28,8 @@ Commands:
 	cron <option> [start | stop | remove <jobId> | jobs]   - Manage cron jobs
 	backup <dbName>                                        - Backup a database
 	cronbackup <dbName> <cronQuery>                        - Set up cron backup with a query
-	subscribe                                              - Subscribe to DDL changes
-	unsubscribe                                            - Unsubscribe from DDL changes
+	listen                                                 - Subscribe to DDL changes
+	unlisten                                               - Unsubscribe from DDL changes
 	tables <schemaName>                                    - List all tables in a schema
 	create <fileName> <tableName> <extension>              - Create a table from a file
 	delete <tableName>                                     - Delete a table
@@ -57,10 +57,10 @@ Commands:
 			handleBackup(cmd, successStyle, errorStyle, resStyle)
 		case "cron":
 			handleCronCommand(cmd, successStyle, errorStyle, resStyle)
-		case "subscribe":
-			handleSubscribe(cmd, successStyle, errorStyle, resStyle)
-		case "unsubscribe":
-			handleUnsubscribe(cmd, successStyle, errorStyle, resStyle)
+		case "listen":
+			handleListen(cmd, successStyle, errorStyle, resStyle)
+		case "unlisten":
+			handleUnlisten(cmd, successStyle, errorStyle, resStyle)
 		case "tables":
 			handleTables(cmd, successStyle, errorStyle, resStyle)
 		case "create":
@@ -134,23 +134,23 @@ func handleCronCommand(cmd []string, successStyle, errorStyle, resStyle lipgloss
 	}
 }
 
-func handleSubscribe(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+func handleListen(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if len(cmd) != 1 {
 		fmt.Println(errorStyle.Render("Usage: subscribe"))
 		return
 	}
 
-	res, err := myClient.SubscribeDDL()
+	res, err := myClient.Listen()
 	handleResponse(res, err, successStyle, errorStyle, resStyle)
 }
 
-func handleUnsubscribe(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+func handleUnlisten(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if len(cmd) != 1 {
 		fmt.Println(errorStyle.Render("Usage: unsubscribe"))
 		return
 	}
 
-	res, err := myClient.UnsubscribeDDL()
+	res, err := myClient.Unlisten()
 	handleResponse(res, err, successStyle, errorStyle, resStyle)
 }
 

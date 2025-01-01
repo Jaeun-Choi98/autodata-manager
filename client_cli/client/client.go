@@ -7,8 +7,8 @@ type ClientInterface interface {
 	ExportTable(tableName, extension string) error
 	ReadAllRecord(tableName string) (map[string]interface{}, error)
 	ReadAllTables(schemaName string) (interface{}, error)
-	SubscribeDDL() (map[string]interface{}, error)
-	UnsubscribeDDL() (map[string]interface{}, error)
+	Listen() (map[string]interface{}, error)
+	Unlisten() (map[string]interface{}, error)
 	CronCommand(param, jobId string) (map[string]interface{}, error)
 	BackupDB(dbName string) (map[string]interface{}, error)
 	CronBackupDB(dbName string, query []string) (map[string]interface{}, error)

@@ -17,8 +17,8 @@ type HandlerInterface interface {
 	ReadAllRecordByTableName(c *gin.Context)
 	ReadAllTablesBySchema(c *gin.Context)
 	CloseHandler()
-	SubscribeDDLTable(c *gin.Context)
-	UnsubscribeDDLTable(c *gin.Context)
+	Listen(c *gin.Context)
+	Unlisten(c *gin.Context)
 
 	BackupDB(c *gin.Context)
 	CronBackupDB(c *gin.Context)

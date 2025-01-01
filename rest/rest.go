@@ -22,20 +22,15 @@ func serveWithHandler(addr string, h handler.HandlerInterface) error {
 	r.POST("/service/create/json", h.CreateTableJSON)
 	r.POST("/service/create/excel", h.CreateTableExcel)
 	r.POST("/service/create/normalize/csv", h.CreateNormalizeTableCSV)
-
 	r.POST("/service/delete", h.DeleteTable)
-
 	r.POST("/service/export/json", h.ExportTableJSON)
 	r.POST("/service/export/csv", h.ExportTableCSV)
 	r.POST("/service/read-table-all", h.ReadAllRecordByTableName)
 	r.POST("/service/get-all-tables", h.ReadAllTablesBySchema)
-
-	r.GET("/service/subscribe", h.SubscribeDDLTable)
-	r.GET("/service/unsubscribe", h.UnsubscribeDDLTable)
-
+	r.GET("/service/listen", h.Listen)
+	r.GET("/service/unlisten", h.Unlisten)
 	r.POST("/service/backup/database", h.BackupDB)
 	r.POST("/service/backup/cron", h.CronBackupDB)
-
 	r.POST("/service/cron/remove", h.RemoveCronJob)
 	r.GET("/service/cron/jobs", h.GetJobList)
 	r.GET("/service/cron/start", h.CronStart)

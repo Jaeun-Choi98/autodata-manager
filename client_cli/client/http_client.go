@@ -189,11 +189,11 @@ func (hc *HttpClient) CronCommand(param, jobId string) (map[string]interface{}, 
 	}
 }
 
-func (hc *HttpClient) UnsubscribeDDL() (map[string]interface{}, error) {
-	url := fmt.Sprintf("%s/unsubscribe", hc.baseUrl)
+func (hc *HttpClient) Unlisten() (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/unlisten", hc.baseUrl)
 	resp, err := hc.client.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unsubscribe: %v", err)
+		return nil, fmt.Errorf("failed to unlisten: %v", err)
 	}
 	defer resp.Body.Close()
 
@@ -216,11 +216,11 @@ func (hc *HttpClient) UnsubscribeDDL() (map[string]interface{}, error) {
 	return response, nil
 }
 
-func (hc *HttpClient) SubscribeDDL() (map[string]interface{}, error) {
-	url := fmt.Sprintf("%s/subscribe", hc.baseUrl)
+func (hc *HttpClient) Listen() (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/listen", hc.baseUrl)
 	resp, err := hc.client.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("failed to subscribe: %v", err)
+		return nil, fmt.Errorf("failed to listen: %v", err)
 	}
 	defer resp.Body.Close()
 

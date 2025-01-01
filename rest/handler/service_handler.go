@@ -56,7 +56,7 @@ func (h *Handler) CronStop(c *gin.Context) {
 }
 
 // 권한 검증이 필요할 수도 있음.
-func (h *Handler) SubscribeDDLTable(c *gin.Context) {
+func (h *Handler) Listen(c *gin.Context) {
 	err := h.myService.StartListenerManager()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -66,7 +66,7 @@ func (h *Handler) SubscribeDDLTable(c *gin.Context) {
 }
 
 // 권한 검증이 필요할 수도 있음.
-func (h *Handler) UnsubscribeDDLTable(c *gin.Context) {
+func (h *Handler) Unlisten(c *gin.Context) {
 	err := h.myService.StopListenerManager()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
