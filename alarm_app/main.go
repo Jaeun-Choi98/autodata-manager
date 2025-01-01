@@ -31,7 +31,7 @@ func main() {
 
 	guide := `
 Commands:
-	subscribe <topicName>                                  - Manage cron jobs
+	subscribe <topicName>                                  - Subscribe Topic
 	exit                                                   - Exit the program
 `
 	fmt.Println(guideStyle.Render(guide))
