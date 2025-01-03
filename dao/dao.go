@@ -7,4 +7,6 @@ type DaoInterface interface {
 	ExistTable(tableName string) bool
 	ReadAllTableData(tableName string) ([]map[string]interface{}, error)
 	ReadAllTables(schemaName string) ([]string, error)
+	ExistSchema(schemaName string) (bool, error)
+	ReadAllSchemas() ([]string, error)
 }

@@ -35,6 +35,8 @@ func serveWithHandler(addr string, h handler.HandlerInterface) error {
 	r.GET("/service/cron/jobs", h.GetJobList)
 	r.GET("/service/cron/start", h.CronStart)
 	r.GET("/service/cron/stop", h.CronStop)
-
+	r.GET("/service/schema/list", h.ReadAllSchemas)
+	r.POST("/service/schema/create", h.CreateSchema)
+	r.POST("/service/schema/delete", h.DeleteSchema)
 	return r.Run(addr)
 }

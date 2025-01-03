@@ -26,6 +26,10 @@ type HandlerInterface interface {
 	GetJobList(c *gin.Context)
 	CronStart(c *gin.Context)
 	CronStop(c *gin.Context)
+
+	ReadAllSchemas(c *gin.Context)
+	DeleteSchema(c *gin.Context)
+	CreateSchema(c *gin.Context)
 }
 
 type Handler struct {

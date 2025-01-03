@@ -36,6 +36,9 @@ Commands:
 	read <tableName>                                       - Read data from a table
 	export <tableName> <extension>                         - Export a table to a file
 	normalize <fileName> <extension>                       - Normalize a table from a file
+	schema create <schemaName>                             - Create a schema
+	schema delete <schemaName> <option> [-f]               - Delete a schema
+	schema list                                            - List all schemas in a database
 	exit                                                   - Exit the program
 `
 
@@ -51,6 +54,8 @@ Commands:
 		}
 
 		switch cmd[0] {
+		case "schema":
+			handleSchemaCmd(cmd, successStyle, errorStyle, resStyle)
 		case "cronbackup":
 			handleCronBackup(cmd, successStyle, errorStyle, resStyle)
 		case "backup":
@@ -83,6 +88,27 @@ Commands:
 }
 
 // 각 명령어 처리 함수들
+
+func handleSchemaCmd(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 2 {
+		fmt.Println(errorStyle.Render("Usage: schema <cmd> [create | delete | list]"))
+		return
+	}
+	switch cmd[1] {
+	case "create":
+		res, err := myClient.MakeSchema(cmd[2])
+		handleResponse(res, err, successStyle, errorStyle, resStyle)
+	case "delete":
+		res, err := myClient.DropSchema(cmd[2])
+		handleResponse(res, err, successStyle, errorStyle, resStyle)
+	case "list":
+		res, err := myClient.ReadAllSchemas()
+		handleResponse(res, err, successStyle, errorStyle, resStyle)
+	default:
+		fmt.Println(errorStyle.Render("Usage: schema <cmd> [create | delete | list]"))
+		return
+	}
+}
 
 func handleCronBackup(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if len(cmd) < 7 {

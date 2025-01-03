@@ -19,6 +19,128 @@ func NewClient() ClientInterface {
 	return &HttpClient{client: &http.Client{}, baseUrl: "http://localhost:8080/service"}
 }
 
+func (hc *HttpClient) ReadAllSchemas() (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/schema/list", hc.baseUrl)
+
+	resp, err := hc.client.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read schema list: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	// 응답 코드 확인
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %v(%v)", resp.Status, response["error"])
+	}
+
+	return response, nil
+}
+
+func (hc *HttpClient) DropSchema(schemaName string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/schema/delete", hc.baseUrl)
+
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// formData("schema_name: schemaName")
+	err := writer.WriteField("schema_name", schemaName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write schema name: %w", err)
+	}
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to backup request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := hc.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %s(%v)", resp.Status, response["error"])
+	}
+
+	return response, nil
+}
+
+func (hc *HttpClient) MakeSchema(schemaName string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/schema/create", hc.baseUrl)
+
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	// formData("schema_name: schemaName")
+	err := writer.WriteField("schema_name", schemaName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write schema name: %w", err)
+	}
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to backup request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	resp, err := hc.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return response, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %s(%v)", resp.Status, response["error"])
+	}
+
+	return response, nil
+}
+
 func (hc *HttpClient) CronBackupDB(dbName string, query []string) (map[string]interface{}, error) {
 	url := fmt.Sprintf("%s/backup/cron", hc.baseUrl)
 

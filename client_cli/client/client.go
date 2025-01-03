@@ -12,4 +12,7 @@ type ClientInterface interface {
 	CronCommand(param, jobId string) (map[string]interface{}, error)
 	BackupDB(dbName string) (map[string]interface{}, error)
 	CronBackupDB(dbName string, query []string) (map[string]interface{}, error)
+	ReadAllSchemas() (map[string]interface{}, error)
+	DropSchema(schemaName string) (map[string]interface{}, error)
+	MakeSchema(schemaName string) (map[string]interface{}, error)
 }

@@ -25,6 +25,9 @@ type ServiceInterface interface {
 	GetJobList() map[string]string
 	CronStart()
 	CronStop()
+	ReadAllSchemas() ([]string, error)
+	DeleteSchema(schemaName string) error
+	CreateSchema(schemaName string) error
 }
 
 type Service struct {

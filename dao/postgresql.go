@@ -70,3 +70,26 @@ func (pq *PostgreSQL) ReadAllTables(schemaName string) ([]string, error) {
 	}
 	return tables, err
 }
+
+func (pq *PostgreSQL) ExistSchema(schemaName string) (bool, error) {
+	var schemaNameResult string
+	err := pq.db.Raw("SELECT schema_name FROM information_schema.schemata WHERE schema_name = ?", schemaName).Scan(&schemaNameResult).Error
+	if err != nil {
+		log.Printf("failed to 'ExistSchema' arg(%s, %v)", schemaName, err)
+		return true, err
+	} else if schemaNameResult == "" {
+		return false, nil
+	} else {
+		return true, nil
+	}
+}
+
+func (pq *PostgreSQL) ReadAllSchemas() ([]string, error) {
+	var schemas []string
+	err := pq.db.Raw("SELECT schema_name FROM information_schema.schemata").Scan(&schemas).Error
+	if err != nil {
+		log.Printf("failed to 'ReadAllSchemas' (%v)", err)
+		return nil, err
+	}
+	return schemas, nil
+}

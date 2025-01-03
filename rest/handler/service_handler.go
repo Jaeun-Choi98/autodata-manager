@@ -8,6 +8,51 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (h *Handler) ReadAllSchemas(c *gin.Context) {
+	schemas, err := h.myService.ReadAllSchemas()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"schema_list": schemas,
+	})
+}
+
+func (h *Handler) DeleteSchema(c *gin.Context) {
+	schemaName := c.PostForm("schema_name")
+	if schemaName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "schema_name is required"})
+		return
+	}
+	err := h.myService.DeleteSchema(schemaName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message":     "schema is deleted successfully",
+		"schema_name": schemaName,
+	})
+}
+
+func (h *Handler) CreateSchema(c *gin.Context) {
+	schemaName := c.PostForm("schema_name")
+	if schemaName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "schema_name is required"})
+		return
+	}
+	err := h.myService.CreateSchema(schemaName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message":     "schema is created successfully",
+		"schema_name": schemaName,
+	})
+}
+
 func (h *Handler) BackupDB(c *gin.Context) {
 	dbName := c.PostForm("db_name")
 	err := h.myService.BackupDatabase(dbName)
@@ -62,7 +107,7 @@ func (h *Handler) Listen(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "subscribed successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "listen successfully"})
 }
 
 // 권한 검증이 필요할 수도 있음.
@@ -72,7 +117,7 @@ func (h *Handler) Unlisten(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "unsubscribed successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "unlisten successfully"})
 }
 
 func (h *Handler) ReadAllTablesBySchema(c *gin.Context) {
