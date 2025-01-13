@@ -1,8 +1,6 @@
 package dao
 
-import (
-	"cju/entity"
-)
+import entity "cju/entity/sample"
 
 type DBLayerInterface interface {
 	AutoMigrateJob() error

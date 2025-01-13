@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"cju/entity"
+	entity "cju/entity/sample"
 	"log"
 
 	"gorm.io/driver/postgres"
