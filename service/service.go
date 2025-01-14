@@ -40,6 +40,7 @@ func NewService(dbHost, dbPort, dbPwd, dbName string) (ServiceInterface, error) 
 	dbInfo := fmt.Sprintf("user=postgres dbname=%s password=%s host=%s port=%s sslmode=disable",
 		dbName, dbPwd, dbHost, dbPort)
 	db, err := dao.NewPostgreSQL(dbInfo)
+	db.Init()
 	if err != nil {
 		return nil, err
 	}

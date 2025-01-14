@@ -1,5 +1,7 @@
 package dao
 
+import "cju/entity/auth"
+
 type DaoInterface interface {
 	Init() error
 	CloseDB() error
@@ -9,4 +11,6 @@ type DaoInterface interface {
 	ReadAllTables(schemaName string) ([]string, error)
 	ExistSchema(schemaName string) (bool, error)
 	ReadAllSchemas() ([]string, error)
+	AddUser(users []*auth.User) error
+	UpdateUser(users []*auth.User) error
 }

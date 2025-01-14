@@ -25,9 +25,7 @@ func AutoMigrateAuthSchema() error {
 	}
 	err = db.AutoMigrate(
 		&User{},
-		&UserProfile{},
-		&UserRole{},
-		&UserRoleAssignment{},
+		&Profile{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database")
