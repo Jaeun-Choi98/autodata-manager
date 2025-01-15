@@ -15,4 +15,6 @@ type ClientInterface interface {
 	ReadAllSchemas() (map[string]interface{}, error)
 	DropSchema(schemaName string) (map[string]interface{}, error)
 	MakeSchema(schemaName string) (map[string]interface{}, error)
+	UpdateUser(filePath string) (map[string]interface{}, error)
+	RegisterUser(filePath string) (map[string]interface{}, error)
 }

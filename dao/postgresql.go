@@ -140,20 +140,24 @@ func (pq *PostgreSQL) UpdateUser(users []*auth.User) error {
 }
 
 func (pq *PostgreSQL) AddUser(users []*auth.User) error {
+	isGenaratedNewRole := false
 	for i, user := range users {
 		roles := user.Roles
 		for j, role := range roles {
 			id, err := utils.GetRoleId(role.RoleName)
-			if err != nil {
-				log.Println(err)
-				return err
+			if err == nil {
+				users[i].Roles[j].ID = id
 			}
-			users[i].Roles[j].ID = id
+			// roles 테이블에 없는 값이므로 ram에 다시 데이터를 올려둬야함.
+			isGenaratedNewRole = true
 		}
 	}
 	if err := pq.db.Create(users).Error; err != nil {
 		log.Println("failed to add user", err)
 		return err
+	}
+	if isGenaratedNewRole {
+		pq.Init()
 	}
 
 	// insert user_roles mapping table

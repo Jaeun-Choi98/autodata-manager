@@ -111,3 +111,15 @@ func TestBackupDatabase(t *testing.T) {
 	err = service.BackupDatabase("test")
 	assert.NoError(t, err, "asdf")
 }
+
+func TestAddUserFromCSV(t *testing.T) {
+	godotenv.Load("../.env")
+	dbHost, dbName, dbPwd, dbPort := os.Getenv("DB_HOST"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_PORT")
+	service, err := NewService(dbHost, dbPort, dbPwd, dbName)
+	if err != nil {
+		log.Println("NewService method err")
+		return
+	}
+	err = service.AddUserFromCSV("../member_data.csv")
+	assert.NoError(t, err, "asdf")
+}

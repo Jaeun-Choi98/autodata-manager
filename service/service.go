@@ -28,6 +28,8 @@ type ServiceInterface interface {
 	ReadAllSchemas() ([]string, error)
 	DeleteSchema(schemaName string) error
 	CreateSchema(schemaName string) error
+	AddUserFromCSV(filePath string) error
+	UpdateUserFromCSV(filePath string) error
 }
 
 type Service struct {

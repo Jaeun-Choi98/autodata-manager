@@ -38,5 +38,7 @@ func serveWithHandler(addr string, h handler.HandlerInterface) error {
 	r.GET("/service/schema/list", h.ReadAllSchemas)
 	r.POST("/service/schema/create", h.CreateSchema)
 	r.POST("/service/schema/delete", h.DeleteSchema)
+	r.POST("/service/user/register", h.RegisterUser)
+	r.POST("/service/user/update", h.UpdateUser)
 	return r.Run(addr)
 }

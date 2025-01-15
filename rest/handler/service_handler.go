@@ -3,10 +3,47 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+func (h *Handler) UpdateUser(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	savePath := fmt.Sprintf("./resource/%s", file.Filename)
+	c.SaveUploadedFile(file, savePath)
+
+	h.myService.UpdateUserFromCSV(savePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "successful!"})
+}
+
+func (h *Handler) RegisterUser(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	savePath := fmt.Sprintf("./resource/%s", file.Filename)
+	c.SaveUploadedFile(file, savePath)
+
+	h.myService.AddUserFromCSV(savePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "successful!"})
+}
 
 func (h *Handler) ReadAllSchemas(c *gin.Context) {
 	schemas, err := h.myService.ReadAllSchemas()

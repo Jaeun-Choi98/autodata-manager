@@ -1,0 +1,4 @@
+Username,Email,Password,IsActive,FirstName,LastName,PhoneNumber,Address,ProfilePicture,Roles
+cju,cju@aaa.com,hashed_password,true,choi23,ju,111-1234-1424,Busan,link,"Admin,Employee"
+jdoe,jdoe@bbb.com,hashed_password,true,johnnnn,doe,222-0000-0000,Seoullll,link2,"Employee"
+asmith,asmith@ccc.com,hashed_password,true,annaasd,smithdf,333-1111-1111,Incheonnnn,link3,"Admin"

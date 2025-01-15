@@ -39,6 +39,8 @@ Commands:
 	schema create <schemaName>                             - Create a schema
 	schema delete <schemaName> <option> [-f]               - Delete a schema
 	schema list                                            - List all schemas in a database
+	register <fileName>                                    - Register users 
+	update <fileName>                                      - Update users 
 	exit                                                   - Exit the program
 `
 
@@ -78,6 +80,10 @@ Commands:
 			handleExport(cmd, successStyle, errorStyle, resStyle)
 		case "normalize":
 			handleNormalize(cmd, successStyle, errorStyle, resStyle)
+		case "register":
+			handleRegister(cmd, successStyle, errorStyle, resStyle)
+		case "update":
+			handleUpdate(cmd, successStyle, errorStyle, resStyle)
 		case "exit":
 			fmt.Println(successStyle.Render("Exiting the program. Goodbye!"))
 			return
@@ -88,6 +94,24 @@ Commands:
 }
 
 // 각 명령어 처리 함수들
+
+func handleRegister(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 1 {
+		fmt.Println(errorStyle.Render("Usage: register <fileName>"))
+		return
+	}
+	res, err := myClient.RegisterUser(cmd[1])
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleUpdate(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 1 {
+		fmt.Println(errorStyle.Render("Usage: update <fileName>"))
+		return
+	}
+	res, err := myClient.UpdateUser(cmd[1])
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
 
 func handleSchemaCmd(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if len(cmd) < 2 {

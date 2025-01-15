@@ -30,6 +30,9 @@ type HandlerInterface interface {
 	ReadAllSchemas(c *gin.Context)
 	DeleteSchema(c *gin.Context)
 	CreateSchema(c *gin.Context)
+
+	UpdateUser(c *gin.Context)
+	RegisterUser(c *gin.Context)
 }
 
 type Handler struct {

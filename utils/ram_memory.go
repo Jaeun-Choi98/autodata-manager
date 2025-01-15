@@ -9,6 +9,7 @@ import (
 var roleIdStore sync.Map
 
 func UploadRoleId(roles []*auth.Role) {
+	roleIdStore.Clear()
 	for _, role := range roles {
 		roleIdStore.Store(role.RoleName, role.ID)
 	}
