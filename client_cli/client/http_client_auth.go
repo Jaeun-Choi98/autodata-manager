@@ -134,7 +134,8 @@ func (hc *HttpClient) RegisterUser(filePath string) (map[string]interface{}, err
 
 	var response map[string]interface{}
 	var buf bytes.Buffer
-	io.Copy(&buf, resp.Body)
+	buf.ReadFrom(resp.Body)
+	//io.Copy(&buf, resp.Body)
 	err = json.Unmarshal(buf.Bytes(), &response)
 	if err != nil {
 		return response, fmt.Errorf("failed to decode JSON response: %w", err)

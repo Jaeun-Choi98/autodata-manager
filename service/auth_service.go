@@ -8,7 +8,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -24,7 +26,10 @@ func (s *Service) UpdateUserFromCSV(filePath string) error {
 	reader := csv.NewReader(file)
 	headers, _ := reader.Read()
 	records, _ := reader.ReadAll()
-	users := CSVToUsers(&headers, &records)
+	users, err := CSVToUsers(&headers, &records)
+	if err != nil {
+		return err
+	}
 	if err := s.mydb.UpdateUser(users); err != nil {
 		return err
 	}
@@ -44,14 +49,17 @@ func (s *Service) AddUserFromCSV(filePath string) error {
 	reader := csv.NewReader(file)
 	headers, _ := reader.Read()
 	records, _ := reader.ReadAll()
-	users := CSVToUsers(&headers, &records)
+	users, err := CSVToUsers(&headers, &records)
+	if err != nil {
+		return err
+	}
 	if err := s.mydb.AddUser(users); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CSVToUsers(headers *[]string, records *[][]string) []*auth.User {
+func CSVToUsers(headers *[]string, records *[][]string) ([]*auth.User, error) {
 	var users []*auth.User
 	roleMap := make(map[string]auth.Role)
 
@@ -66,7 +74,11 @@ func CSVToUsers(headers *[]string, records *[][]string) []*auth.User {
 			case "Email":
 				user.Email = record[i]
 			case "Password":
-				user.Password = record[i]
+				pwd, err := hashPassword(record[i])
+				if err != nil {
+					return nil, err
+				}
+				user.Password = pwd
 			case "IsActive":
 				isActive, _ := strconv.ParseBool(record[i])
 				user.IsActive = isActive
@@ -95,11 +107,10 @@ func CSVToUsers(headers *[]string, records *[][]string) []*auth.User {
 		user.Roles = roles
 		users = append(users, user)
 	}
-	return users
+	return users, nil
 }
 
 func hashPassword(password string) (string, error) {
-	// bcrypt.GenerateFromPassword를 사용해 해시 생성
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", fmt.Errorf("failed to hash password: %w", err)
@@ -108,7 +119,40 @@ func hashPassword(password string) (string, error) {
 }
 
 func checkPassword(hashedPassword, password string) bool {
-	// bcrypt.CompareHashAndPassword로 검증
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return err == nil
+}
+
+// registerd claim( exp, iss, sub, aud, etc.. )
+func GenerateJWT(email, role string) (string, error) {
+	claims := jwt.MapClaims{
+		"sub":  email,
+		"exp":  time.Now().Add(time.Hour * 12).Unix(),
+		"role": role,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	secretKey := os.Getenv("JWT_KEY")
+	return token.SignedString([]byte(secretKey))
+}
+
+func ValidateJWT(tokenString string) (string, string, error) {
+	secretKey := os.Getenv("JWT_KEY")
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			log.Printf("unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return secretKey, nil
+	})
+	if err != nil {
+		log.Println(err)
+		return "", "", err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		email, _ := claims.GetSubject()
+		role := claims["role"].(string)
+		return email, role, nil
+	}
+	log.Println("invalid token")
+	return "", "", fmt.Errorf("invalid token")
 }
