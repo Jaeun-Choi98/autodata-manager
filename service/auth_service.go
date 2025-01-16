@@ -14,6 +14,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func (s *Service) Login(email, pwd string) (string, error) {
+	user, err := s.mydb.ReadUserByEmail(email)
+	if err != nil {
+		return "", err
+	}
+	if !checkPassword(user.Password, pwd) {
+		log.Println("password does not match")
+		return "", fmt.Errorf("password does not match")
+	}
+	jwtString, err := GenerateJWT(user.Email, user.Roles[0].RoleName)
+	if err != nil {
+		return "", err
+	}
+	return jwtString, nil
+}
+
 func (s *Service) UpdateUserFromCSV(filePath string) error {
 	// read csv file
 	file, err := os.Open(filePath)
@@ -124,6 +140,7 @@ func checkPassword(hashedPassword, password string) bool {
 }
 
 // registerd claim( exp, iss, sub, aud, etc.. )
+// 이후 user의 role이 여러 개일 수도 있음.
 func GenerateJWT(email, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub":  email,
@@ -132,20 +149,26 @@ func GenerateJWT(email, role string) (string, error) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	secretKey := os.Getenv("JWT_KEY")
-	return token.SignedString([]byte(secretKey))
+	signedToken, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		log.Printf("failed to sign token: %v", err)
+		return "", err
+	}
+	return signedToken, nil
 }
 
 func ValidateJWT(tokenString string) (string, string, error) {
 	secretKey := os.Getenv("JWT_KEY")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			log.Printf("unexpected signing method: %v", token.Header["alg"])
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return secretKey, nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
-		log.Println(err)
+		log.Printf("failed to parse token: %v", err)
 		return "", "", err
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {

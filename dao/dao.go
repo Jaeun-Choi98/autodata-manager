@@ -13,4 +13,5 @@ type DaoInterface interface {
 	ReadAllSchemas() ([]string, error)
 	AddUser(users []*auth.User) error
 	UpdateUser(users []*auth.User) error
+	ReadUserByEmail(email string) (*auth.User, error)
 }

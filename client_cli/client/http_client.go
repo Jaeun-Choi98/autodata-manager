@@ -13,6 +13,7 @@ import (
 type HttpClient struct {
 	client  *http.Client
 	baseUrl string
+	token   string
 }
 
 func NewClient() ClientInterface {
@@ -22,7 +23,12 @@ func NewClient() ClientInterface {
 func (hc *HttpClient) ReadAllSchemas() (map[string]interface{}, error) {
 	url := fmt.Sprintf("%s/schema/list", hc.baseUrl)
 
-	resp, err := hc.client.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+hc.token)
+	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read schema list: %v", err)
 	}
@@ -69,7 +75,7 @@ func (hc *HttpClient) DropSchema(schemaName string) (map[string]interface{}, err
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -116,7 +122,7 @@ func (hc *HttpClient) MakeSchema(schemaName string) (map[string]interface{}, err
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -168,7 +174,7 @@ func (hc *HttpClient) CronBackupDB(dbName string, query []string) (map[string]in
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -216,7 +222,7 @@ func (hc *HttpClient) BackupDB(dbName string) (map[string]interface{}, error) {
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -243,30 +249,46 @@ func (hc *HttpClient) BackupDB(dbName string) (map[string]interface{}, error) {
 
 func (hc *HttpClient) CronCommand(param, jobId string) (map[string]interface{}, error) {
 	url := fmt.Sprintf("%s/cron/%s", hc.baseUrl, param)
+
 	switch param {
 	case "start":
-		resp, _ := hc.client.Get(url)
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer "+hc.token)
+		resp, _ := hc.client.Do(req)
 		defer resp.Body.Close()
 		if resp.StatusCode == http.StatusNotFound {
 			return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
 		}
 		return nil, nil
 	case "stop":
-		resp, _ := hc.client.Get(url)
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer "+hc.token)
+		resp, _ := hc.client.Do(req)
 		defer resp.Body.Close()
 		if resp.StatusCode == http.StatusNotFound {
 			return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
 		}
 		return nil, nil
 	case "jobs":
-		resp, _ := hc.client.Get(url)
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer "+hc.token)
+		resp, _ := hc.client.Do(req)
 		defer resp.Body.Close()
 		if resp.StatusCode == http.StatusNotFound {
 			return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
 		}
 		var response map[string]interface{}
 		decoder := json.NewDecoder(resp.Body)
-		err := decoder.Decode(&response)
+		err = decoder.Decode(&response)
 		if err != nil {
 			return response, fmt.Errorf("failed to decode JSON response: %w", err)
 		}
@@ -295,6 +317,7 @@ func (hc *HttpClient) CronCommand(param, jobId string) (map[string]interface{}, 
 		}
 
 		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", "Bearer "+hc.token)
 
 		resp, err := hc.client.Do(req)
 		if err != nil {
@@ -313,7 +336,12 @@ func (hc *HttpClient) CronCommand(param, jobId string) (map[string]interface{}, 
 
 func (hc *HttpClient) Unlisten() (map[string]interface{}, error) {
 	url := fmt.Sprintf("%s/unlisten", hc.baseUrl)
-	resp, err := hc.client.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+hc.token)
+	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unlisten: %v", err)
 	}
@@ -340,7 +368,12 @@ func (hc *HttpClient) Unlisten() (map[string]interface{}, error) {
 
 func (hc *HttpClient) Listen() (map[string]interface{}, error) {
 	url := fmt.Sprintf("%s/listen", hc.baseUrl)
-	resp, err := hc.client.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+hc.token)
+	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to listen: %v", err)
 	}
@@ -387,7 +420,7 @@ func (hc *HttpClient) ReadAllTables(schemaName string) (interface{}, error) {
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -433,7 +466,7 @@ func (hc *HttpClient) ReadAllRecord(tableName string) (map[string]interface{}, e
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -478,7 +511,7 @@ func (hc *HttpClient) ExportTable(tableName, extension string) error {
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
@@ -530,7 +563,7 @@ func (hc *HttpClient) DropTable(tableName string) (map[string]interface{}, error
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -588,7 +621,7 @@ func (hc *HttpClient) NormalizeTable(filePath, extension string) (map[string]int
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	resp, err := hc.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -662,6 +695,7 @@ func (hc *HttpClient) MakeTable(filePath, tableName, extension string) (map[stri
 
 	// Content-Type 헤더 설정
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 
 	// 클라이언트로 요청 보내기
 	resp, err := hc.client.Do(req)

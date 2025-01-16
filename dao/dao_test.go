@@ -3,6 +3,7 @@ package dao_test
 import (
 	"cju/dao"
 	"cju/entity/auth"
+	"log"
 
 	"fmt"
 	"os"
@@ -126,4 +127,15 @@ func TestUpdateUser(t *testing.T) {
 	users = append(users, user2)
 	err := pgdb.UpdateUser(users)
 	assert.NoError(t, err, "failed to 'UpdateRecord'")
+}
+
+func TestReadUserByEmail(t *testing.T) {
+	godotenv.Load("../.env")
+	dbHost, dbName, dbPwd, dbPort := os.Getenv("DB_HOST"), os.Getenv("DB_NAME"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_PORT")
+	con := fmt.Sprintf(testConnectionString, dbHost, dbPwd, dbName, dbPort)
+	pgdb, _ := dao.NewPostgreSQL(con)
+	pgdb.Init()
+	user, err := pgdb.ReadUserByEmail("cju@aaa.com")
+	assert.NoError(t, err, "failed to read user by email")
+	log.Println(user)
 }

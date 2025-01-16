@@ -17,4 +17,6 @@ type ClientInterface interface {
 	MakeSchema(schemaName string) (map[string]interface{}, error)
 	UpdateUser(filePath string) (map[string]interface{}, error)
 	RegisterUser(filePath string) (map[string]interface{}, error)
+	Logout() (map[string]interface{}, error)
+	Login(email, pwd string) (map[string]interface{}, error)
 }

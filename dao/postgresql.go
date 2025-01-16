@@ -190,3 +190,12 @@ func (pq *PostgreSQL) AddUser(users []*auth.User) error {
 	*/
 	return nil
 }
+
+func (pq *PostgreSQL) ReadUserByEmail(email string) (*auth.User, error) {
+	var user *auth.User
+	if err := pq.db.Preload("Roles").Preload("Profile").Find(&user, "email like ?", email).Error; err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return user, nil
+}

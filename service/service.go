@@ -30,6 +30,7 @@ type ServiceInterface interface {
 	CreateSchema(schemaName string) error
 	AddUserFromCSV(filePath string) error
 	UpdateUserFromCSV(filePath string) error
+	Login(email, pwd string) (string, error)
 }
 
 type Service struct {

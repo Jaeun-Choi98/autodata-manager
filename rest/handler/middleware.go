@@ -16,7 +16,6 @@ func JWTMiddlewareEmployee() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		email, role, err := service.ValidateJWT(tokenString)
 		if err != nil {

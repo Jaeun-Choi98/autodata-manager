@@ -33,6 +33,7 @@ type HandlerInterface interface {
 
 	UpdateUser(c *gin.Context)
 	RegisterUser(c *gin.Context)
+	Login(c *gin.Context)
 }
 
 type Handler struct {

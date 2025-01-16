@@ -1,0 +1,2 @@
+Username,Email,Password,IsActive,FirstName,LastName,PhoneNumber,Address,ProfilePicture,Roles
+cju,cju@cju.com,1234,true,choi,jaeun,010-1234-5678,Korea,link,Admin

@@ -1,4 +1,4 @@
 Username,Email,Password,IsActive,FirstName,LastName,PhoneNumber,Address,ProfilePicture,Roles
-cju,cju@aaa.com,hashed_password,true,choi23,ju,111-1234-1424,Busan,link,"Admin,Employee"
-jdoe,jdoe@bbb.com,hashed_password,true,johnnnn,doe,222-0000-0000,Seoullll,link2,"Employee"
-asmith,asmith@ccc.com,hashed_password,true,annaasd,smithdf,333-1111-1111,Incheonnnn,link3,"Admin"
+alex.martin,john.doe@service.com,7d8r3vK5q2z,true,Alex,Martin,555-4321-8765,Boston,link1,"Admin"
+emily.jones,jane.smith@service.com,9t2h5gB4r1p,true,Emily,Jones,444-8765-1234,Los Angeles,link2,"Employee"
+david.brown,michael.jones@service.com,1m9p2sH7k4b,true,David,Brown,555-6789-4321,Austin,link3,"Admin"

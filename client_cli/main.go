@@ -25,23 +25,30 @@ func main() {
 
 	guide := `
 Commands:
-	cron <option> [start | stop | remove <jobId> | jobs]   - Manage cron jobs
-	backup <dbName>                                        - Backup a database
-	cronbackup <dbName> <cronQuery>                        - Set up cron backup with a query
-	listen                                                 - Listen to DDL changes
-	unlisten                                               - Unlisten from DDL changes
-	tables <schemaName>                                    - List all tables in a schema
-	create <fileName> <tableName> <extension>              - Create a table from a file
-	delete <tableName>                                     - Delete a table
-	read <tableName>                                       - Read data from a table
-	export <tableName> <extension>                         - Export a table to a file
-	normalize <fileName> <extension>                       - Normalize a table from a file
-	schema create <schemaName>                             - Create a schema
-	schema delete <schemaName> <option> [-f]               - Delete a schema
-	schema list                                            - List all schemas in a database
-	register <fileName>                                    - Register users 
-	update <fileName>                                      - Update users 
-	exit                                                   - Exit the program
+	Public:
+		login <email> <password>                                    - Login
+		exit                                                        - Exit the program
+
+	Employee:
+		cron <option> [start | stop | remove <jobId> | jobs]         - Manage cron jobs
+		backup <dbName>                                              - Backup a database
+		cronbackup <dbName> <cronQuery>                              - Set up cron backup with a query
+		listen                                                       - Listen to DDL changes
+		unlisten                                                     - Unlisten from DDL changes
+		tables <schemaName>                                          - List all tables in a schema
+		create <fileName> <tableName> <extension>                    - Create a table from a file (csv, json, excel)
+		delete <tableName>                                           - Delete a table
+		read <tableName>                                             - Read data from a table
+		export <tableName> <extension>                               - Export a table to a file (csv, json)
+		normalize <fileName> <extension>                             - Normalize a table from a file (csv)
+		schema list                                                  - List all schemas in a database
+		logout                                                       - Logout
+
+	Admin:
+		schema create <schemaName>                                   - Create a schema
+		schema delete <schemaName> <option> [-f]                     - Delete a schema
+		register <fileName>                                          - Register users
+		update <fileName>                                            - Update users
 `
 
 	fmt.Println(guideStyle.Render(guide))
@@ -56,6 +63,10 @@ Commands:
 		}
 
 		switch cmd[0] {
+		case "login":
+			handleLogin(cmd, successStyle, errorStyle, resStyle)
+		case "logout":
+			handleLogout(cmd, successStyle, errorStyle, resStyle)
 		case "schema":
 			handleSchemaCmd(cmd, successStyle, errorStyle, resStyle)
 		case "cronbackup":
@@ -94,6 +105,24 @@ Commands:
 }
 
 // 각 명령어 처리 함수들
+
+func handleLogin(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 3 {
+		fmt.Println(errorStyle.Render("Usage: login <email> <password>"))
+		return
+	}
+	res, err := myClient.Login(cmd[1], cmd[2])
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
+func handleLogout(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 1 {
+		fmt.Println(errorStyle.Render("Usage: logout"))
+		return
+	}
+	res, err := myClient.Logout()
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
 
 func handleRegister(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if len(cmd) < 1 {

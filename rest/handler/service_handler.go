@@ -9,6 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (h *Handler) Login(c *gin.Context) {
+	email := c.PostForm("email")
+	pwd := c.PostForm("password")
+
+	token, err := h.myService.Login(email, pwd)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.Header("Authorization", "Bearer "+token)
+	c.JSON(http.StatusOK, gin.H{"message": "successful", "exp": "12hour"})
+}
+
 func (h *Handler) UpdateUser(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {

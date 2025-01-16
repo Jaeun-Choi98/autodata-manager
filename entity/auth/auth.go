@@ -6,7 +6,7 @@ import (
 
 type User struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement"`
-	Username  string    `gorm:"type:varchar(50);unique;not null"`
+	Username  string    `gorm:"type:varchar(50);not null"`
 	Email     string    `gorm:"type:varchar(100);unique;not null"`
 	Password  string    `gorm:"type:text;not null"`
 	IsActive  bool      `gorm:"default:true"`

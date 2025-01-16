@@ -8,7 +8,63 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 )
+
+func (hc *HttpClient) Logout() (map[string]interface{}, error) {
+	hc.token = ""
+	return map[string]interface{}{"message": "successful"}, nil
+}
+
+func (hc *HttpClient) Login(email, pwd string) (map[string]interface{}, error) {
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+	// formData { email: email, password: pwd }
+	err := writer.WriteField("email", email)
+	if err != nil {
+		return nil, err
+	}
+	err = writer.WriteField("password", pwd)
+	if err != nil {
+		return nil, err
+	}
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/user/login", hc.baseUrl)
+	req, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	resp, err := hc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("404 Not Found: the requested URL %s does not exist", url)
+	}
+
+	var response map[string]interface{}
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode JSON response: %w", err)
+	}
+
+	// 응답 코드 확인
+	if resp.StatusCode != http.StatusOK {
+		return response, fmt.Errorf("received non-OK response: %v(%v)", resp.Status, response["error"])
+	}
+	jwt := resp.Header.Get("Authorization")
+	token := strings.TrimPrefix(jwt, "Bearer ")
+	hc.token = token
+	return response, nil
+}
 
 func (hc *HttpClient) UpdateUser(filePath string) (map[string]interface{}, error) {
 
@@ -51,7 +107,7 @@ func (hc *HttpClient) UpdateUser(filePath string) (map[string]interface{}, error
 
 	// Content-Type 헤더 설정
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	// 클라이언트로 요청 보내기
 	resp, err := hc.client.Do(req)
 	if err != nil {
@@ -120,7 +176,7 @@ func (hc *HttpClient) RegisterUser(filePath string) (map[string]interface{}, err
 
 	// Content-Type 헤더 설정
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
+	req.Header.Set("Authorization", "Bearer "+hc.token)
 	// 클라이언트로 요청 보내기
 	resp, err := hc.client.Do(req)
 	if err != nil {
