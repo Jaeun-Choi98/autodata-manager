@@ -42,13 +42,14 @@ Commands:
 		export <tableName> <extension>                               - Export a table to a file (csv, json)
 		normalize <fileName> <extension>                             - Normalize a table from a file (csv)
 		schema list                                                  - List all schemas in a database
+		user info <email>                                            - Read a user info
 		logout                                                       - Logout
 
 	Admin:
 		schema create <schemaName>                                   - Create a schema
 		schema delete <schemaName> <option> [-f]                     - Delete a schema
-		register <fileName>                                          - Register users
-		update <fileName>                                            - Update users
+		user register <fileName>                                          - Register users
+		user update <fileName>                                            - Update users
 `
 
 	fmt.Println(guideStyle.Render(guide))
@@ -91,10 +92,8 @@ Commands:
 			handleExport(cmd, successStyle, errorStyle, resStyle)
 		case "normalize":
 			handleNormalize(cmd, successStyle, errorStyle, resStyle)
-		case "register":
-			handleRegister(cmd, successStyle, errorStyle, resStyle)
-		case "update":
-			handleUpdate(cmd, successStyle, errorStyle, resStyle)
+		case "user":
+			handleUser(cmd, successStyle, errorStyle, resStyle)
 		case "exit":
 			fmt.Println(successStyle.Render("Exiting the program. Goodbye!"))
 			return
@@ -105,6 +104,26 @@ Commands:
 }
 
 // 각 명령어 처리 함수들
+func handleUser(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 3 {
+		fmt.Println(errorStyle.Render("Usage: user <cmd> [register | update | info] <arg>"))
+		return
+	}
+	switch cmd[1] {
+	case "register":
+		res, err := myClient.RegisterUser(cmd[2])
+		handleResponse(res, err, successStyle, errorStyle, resStyle)
+	case "update":
+		res, err := myClient.UpdateUser(cmd[2])
+		handleResponse(res, err, successStyle, errorStyle, resStyle)
+	case "info":
+		res, err := myClient.ReadUserInfo(cmd[2])
+		handleResponse(res, err, successStyle, errorStyle, resStyle)
+	default:
+		fmt.Println(errorStyle.Render("Usage: user <cmd> [register | update | info] <arg>"))
+		return
+	}
+}
 
 func handleLogin(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if len(cmd) < 3 {
@@ -121,24 +140,6 @@ func handleLogout(cmd []string, successStyle, errorStyle, resStyle lipgloss.Styl
 		return
 	}
 	res, err := myClient.Logout()
-	handleResponse(res, err, successStyle, errorStyle, resStyle)
-}
-
-func handleRegister(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
-	if len(cmd) < 1 {
-		fmt.Println(errorStyle.Render("Usage: register <fileName>"))
-		return
-	}
-	res, err := myClient.RegisterUser(cmd[1])
-	handleResponse(res, err, successStyle, errorStyle, resStyle)
-}
-
-func handleUpdate(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
-	if len(cmd) < 1 {
-		fmt.Println(errorStyle.Render("Usage: update <fileName>"))
-		return
-	}
-	res, err := myClient.UpdateUser(cmd[1])
 	handleResponse(res, err, successStyle, errorStyle, resStyle)
 }
 

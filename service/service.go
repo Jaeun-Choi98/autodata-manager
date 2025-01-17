@@ -2,6 +2,7 @@ package service
 
 import (
 	"cju/dao"
+	"cju/entity/auth"
 	"fmt"
 	"log"
 )
@@ -31,6 +32,7 @@ type ServiceInterface interface {
 	AddUserFromCSV(filePath string) error
 	UpdateUserFromCSV(filePath string) error
 	Login(email, pwd string) (string, error)
+	ReadUserByEmail(email string) (*auth.User, error)
 }
 
 type Service struct {

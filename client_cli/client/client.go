@@ -19,4 +19,5 @@ type ClientInterface interface {
 	RegisterUser(filePath string) (map[string]interface{}, error)
 	Logout() (map[string]interface{}, error)
 	Login(email, pwd string) (map[string]interface{}, error)
+	ReadUserInfo(email string) (map[string]interface{}, error)
 }

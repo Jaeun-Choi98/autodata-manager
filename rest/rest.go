@@ -44,6 +44,7 @@ func serveWithHandler(addr string, h handler.HandlerInterface) error {
 		employee.GET("/cron/start", h.CronStart)
 		employee.GET("/cron/stop", h.CronStop)
 		employee.GET("/schema/list", h.ReadAllSchemas)
+		employee.POST("/user", h.ReadUserByEmail)
 	}
 
 	admin := r.Group("/service")

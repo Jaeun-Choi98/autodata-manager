@@ -9,6 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (h *Handler) ReadUserByEmail(c *gin.Context) {
+	email := c.PostForm("email")
+	user, err := h.myService.ReadUserByEmail(email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
 func (h *Handler) Login(c *gin.Context) {
 	email := c.PostForm("email")
 	pwd := c.PostForm("password")

@@ -14,6 +14,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func (s *Service) ReadUserByEmail(email string) (*auth.User, error) {
+	user, err := s.mydb.ReadUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (s *Service) Login(email, pwd string) (string, error) {
 	user, err := s.mydb.ReadUserByEmail(email)
 	if err != nil {
