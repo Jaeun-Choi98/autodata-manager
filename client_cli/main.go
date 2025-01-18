@@ -48,8 +48,8 @@ Commands:
 	Admin:
 		schema create <schemaName>                                   - Create a schema
 		schema delete <schemaName> <option> [-f]                     - Delete a schema
-		user register <fileName>                                          - Register users
-		user update <fileName>                                            - Update users
+		user register <fileName>                                     - Register users
+		user update <fileName>                                       - Update users
 `
 
 	fmt.Println(guideStyle.Render(guide))
