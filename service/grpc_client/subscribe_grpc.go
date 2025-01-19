@@ -20,7 +20,7 @@ func SubscribeToMOM(ctx context.Context, topic string, msgToApp chan map[string]
 
 	client := pb.NewBrokerServiceClient(conn)
 
-	stream, err := client.Subscribe(context.Background(), &pb.SubscribeRequest{Topic: topic})
+	stream, err := client.Subscribe(ctx, &pb.SubscribeRequest{Topic: topic})
 	if err != nil {
 		log.Fatalf("failed to subscribe: %v", err)
 		return err

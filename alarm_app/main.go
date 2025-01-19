@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -56,11 +55,11 @@ Commands:
 }
 
 func handleSubscribe(ctx context.Context, cmd []string, emailStyle, errorStyle lipgloss.Style) {
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	// wg := &sync.WaitGroup{}
+	// wg.Add(1)
 	msgSub := make(chan map[string]interface{}, 10)
 	go func() {
-		defer wg.Done()
+		//defer wg.Done()
 		err := grpc_client.SubscribeToMOM(ctx, cmd[1], msgSub)
 		if err != nil {
 			log.Println(errorStyle.Render("failed to subscribe"))
@@ -80,7 +79,7 @@ func handleSubscribe(ctx context.Context, cmd []string, emailStyle, errorStyle l
 			}
 		}
 	}()
-	wg.Wait()
+	//wg.Wait()
 }
 
 func createEmail(msg map[string]interface{}) string {

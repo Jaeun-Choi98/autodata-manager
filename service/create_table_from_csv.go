@@ -36,6 +36,8 @@ func (s *Service) CreateNormalizeTableFromCSV(filePath string) (string, error) {
 		1. ai를 사용해서 정규화된 스키마를 얻음. + 알고리즘을 사용해서 데이터를 옮김( 외래키에 대한 처리 )
 		2. ai를 사용하여 정규화된 스키마와 데이터를 얻음.
 		어떤 것이 좋을지 생각해 봐야함.
+		++
+		이후에 비동기적으로 처리를 해야함.
 	*/
 	resp := grpc_client.NormalizeByOpenAI(reqData.String())
 	if resp == "" {
