@@ -1,6 +1,7 @@
 import cv2
 import pytesseract
 import matplotlib.pyplot as plt
+from transformers import pipeline
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -53,6 +54,10 @@ print(text)
 
 plt_imshow("",[thresh,gray,image])
 
+# NER( Named Entity Recognition )
 
-
+# ner = pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english", revision="4c53496", grouped_entities=True)
+# entities = ner(text)
+# for entity in entities:
+#     print(f"{entity['word']} ({entity['entity_group']}): {entity['score']:.2f}")
 
