@@ -41,7 +41,7 @@ def plt_imshow(title='image', img=None, figsize=(8 ,5)):
       plt.show()
 
 # 이미지 로드
-image = cv2.imread('../test.png')
+image = cv2.imread('img_test.png')
 
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) 
 thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
