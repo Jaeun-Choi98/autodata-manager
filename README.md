@@ -2,6 +2,8 @@
 
 ### [프로젝트 설명 및 실습 영상](https://youtu.be/2WY0ZnQstG8)
 
+### [2차 프로젝트 설명 및 실습습 영상](https://www.youtube.com/watch?v=PDchZqndLcQ)
+
 <br>
 
 ## 소개
@@ -10,7 +12,7 @@
 
 <br>
 
-## 주요 기능
+## 주요 기능 ( 2024.12.15 ~ 2025.01.01 )
 
 - **Cron 작업 관리**: Cron 작업의 시작, 중지, 삭제, 조회를 지원.
 - **데이터베이스 백업**: 특정 데이터베이스를 백업.
@@ -23,6 +25,18 @@
   - 테이블 데이터를 파일로 내보내기.
 - **AI 기반 정규화**: 파일 데이터를 기반으로 AI를 활용해 테이블 정규화.
 - **알림 시스템**: MOM 서버를 통해 이벤트를 알림 애플리케이션으로 전달.
+
+<br>
+
+## 추가된 기능 ( 2025.01.03 ~ 2025.01.20 )
+
+- **스키마 관리**:
+  - 스키마 삭제, 생성, 조회
+- **사용자 관리**:
+  - 회원가입/회원정보 수정
+  - 로그인/로그아웃
+  - jwt를 사용한 역할에 따른 서비스 접근 제어
+  - 회원정보 조회
 
 <br>
 
@@ -131,6 +145,23 @@ graph TD
 
    ```bash
    subscribe <topicName>
+   ```
+
+8. **테이블 내보내기**
+
+   ```bash
+   schema list
+   schema create <schemaName>
+   schema delete <schemaName>
+   ```
+
+9. **AlarmApp 명령어**
+
+   ```bash
+   login/logout
+   user register <fileName>
+   user update <fileName>
+   user info <email>
    ```
 
 <br>
