@@ -56,6 +56,7 @@ func (hc *HttpClient) ReadUserInfo(email string) (map[string]interface{}, error)
 
 func (hc *HttpClient) Logout() (map[string]interface{}, error) {
 	hc.token = ""
+	hc.email = ""
 	return map[string]interface{}{"message": "successful"}, nil
 }
 
@@ -106,6 +107,7 @@ func (hc *HttpClient) Login(email, pwd string) (map[string]interface{}, error) {
 	jwt := resp.Header.Get("Authorization")
 	token := strings.TrimPrefix(jwt, "Bearer ")
 	hc.token = token
+	hc.email = email
 	return response, nil
 }
 

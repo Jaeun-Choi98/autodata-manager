@@ -1,4 +1,4 @@
 Username,Email,Password,IsActive,FirstName,LastName,PhoneNumber,Address,ProfilePicture,Roles
-john.doe,john.doe@service.com,4r9p3xH2t7a,true,John,Doe,111-1234-1424,New York,link1,"Admin"
-jane.smith,jane.smith@service.com,5k8d9hG3b1z,true,Jane,Smith,222-5678-9101,San Francisco,link2,"Employee"
-michael.jones,michael.jones@service.com,3b7k2fP9v4m,true,Michael,Jones,333-9876-5432,Chicago,link3,"Admin"
+john.doe,john.doe@service.com,1234132,true,John,Doe,111-1234-1424,New York,link1,"Admin"
+jane.smith,jane.smith@service.com,1234,true,Jane,Smith,222-5678-9101,San Francisco,link2,"Employee"
+michael.jones,michael.jones@service.com,54325,true,Michael,Jones,333-9876-5432,Chicago,link3,"Admin"

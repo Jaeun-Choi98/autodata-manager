@@ -1,4 +1,4 @@
 Username,Email,Password,IsActive,FirstName,LastName,PhoneNumber,Address,ProfilePicture,Roles
-alex.martin,john.doe@service.com,7d8r3vK5q2z,true,Alex,Martin,555-4321-8765,Boston,link1,"Admin"
-emily.jones,jane.smith@service.com,9t2h5gB4r1p,true,Emily,Jones,444-8765-1234,Los Angeles,link2,"Employee"
-david.brown,michael.jones@service.com,1m9p2sH7k4b,true,David,Brown,555-6789-4321,Austin,link3,"Admin"
+alex.martin,john.doe@service.com,32234,true,Alex,Martin,555-4321-8765,Boston,link1,"Admin"
+emily.jones,jane.smith@service.com,3333,true,Emily,Jones,444-8765-1234,Los Angeles,link2,"Employee"
+david.brown,michael.jones@service.com,333332,true,David,Brown,555-6789-4321,Austin,link3,"Admin"

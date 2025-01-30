@@ -20,4 +20,6 @@ type ClientInterface interface {
 	Logout() (map[string]interface{}, error)
 	Login(email, pwd string) (map[string]interface{}, error)
 	ReadUserInfo(email string) (map[string]interface{}, error)
+	GetToken() string
+	GetEmail() string
 }

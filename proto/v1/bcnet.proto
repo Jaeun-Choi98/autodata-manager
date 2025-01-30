@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package bcnet;
+
+option go_package = "/bcnet";
+
+service BlockChainNetworkService {
+  rpc SendMessage(MessageRequest) returns(MessageResponse);
+}
+
+message MessageRequest {
+  string token = 1;
+  string cmd = 2;
+  string consortium = 3;
+  repeated string transaction = 4;
+}
+
+message MessageResponse {
+  bool success = 1;
+  repeated string blockchain = 2;
+}

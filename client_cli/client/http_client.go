@@ -14,10 +14,19 @@ type HttpClient struct {
 	client  *http.Client
 	baseUrl string
 	token   string
+	email   string
 }
 
 func NewClient() ClientInterface {
 	return &HttpClient{client: &http.Client{}, baseUrl: "http://localhost:8080/service"}
+}
+
+func (hc *HttpClient) GetEmail() string {
+	return hc.email
+}
+
+func (hc *HttpClient) GetToken() string {
+	return hc.token
 }
 
 func (hc *HttpClient) ReadAllSchemas() (map[string]interface{}, error) {

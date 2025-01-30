@@ -36,9 +36,9 @@ func TestBlockChainNetwork(t *testing.T) {
 	// Test creating a consortium
 	t.Run("Create Consortium", func(t *testing.T) {
 		req := &Request{
-			token:      adminToken,
-			cmd:        "make",
-			consortium: consortiumName,
+			Token:      adminToken,
+			Cmd:        "make",
+			Consortium: consortiumName,
 		}
 		err := bcnet.ValidateRequest(req)
 		assert.NoError(t, err)
@@ -49,9 +49,9 @@ func TestBlockChainNetwork(t *testing.T) {
 	// Test approving a peer
 	t.Run("Approve Peer", func(t *testing.T) {
 		req := &Request{
-			token:      peerToken,
-			cmd:        "participate",
-			consortium: consortiumName,
+			Token:      peerToken,
+			Cmd:        "participate",
+			Consortium: consortiumName,
 		}
 		err := bcnet.ValidateRequest(req)
 		assert.NoError(t, err)
@@ -62,8 +62,8 @@ func TestBlockChainNetwork(t *testing.T) {
 	t.Run("Get Blockchain", func(t *testing.T) {
 		bcnet.Blockchains[consortiumName] = NewBlockChain()
 		req := &Request{
-			token:      peerToken,
-			consortium: consortiumName,
+			Token:      peerToken,
+			Consortium: consortiumName,
 		}
 		blockchain, err := bcnet.GetBlockChain(req)
 		assert.NoError(t, err)
@@ -74,8 +74,8 @@ func TestBlockChainNetwork(t *testing.T) {
 	// Test invalid consortium access
 	t.Run("Invalid Consortium Access", func(t *testing.T) {
 		req := &Request{
-			token:      peerToken,
-			consortium: "InvalidConsortium",
+			Token:      peerToken,
+			Consortium: "InvalidConsortium",
 		}
 		_, err := bcnet.GetBlockChain(req)
 		assert.Error(t, err)

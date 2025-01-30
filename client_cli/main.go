@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"cju/client_cli/client"
+
+	pb "cju/proto/v1/bcnet"
 	"fmt"
 	"os"
 	"strings"
@@ -12,16 +14,21 @@ import (
 )
 
 var (
-	reader   = bufio.NewReader(os.Stdin)
-	myClient = client.NewClient()
+	reader     = bufio.NewReader(os.Stdin)
+	myClient   = client.NewClient()
+	myBcClient *client.BcClient
 )
 
 func main() {
+
 	// 스타일 정의
 	guideStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FF5733"))
 	successStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#00FF00"))
 	errorStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FF0000"))
 	resStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FFFFFF"))
+
+	myBcClient, _ = client.NewBlockChainClient()
+	defer myBcClient.Close()
 
 	guide := `
 Commands:
@@ -62,7 +69,9 @@ Commands:
 			fmt.Println(errorStyle.Render("Invalid command. Please try again."))
 			continue
 		}
-
+		if myClient.GetEmail() != "" {
+			myBcClient.SendAllConsortiumsTransactions(myClient.GetToken(), []string{fmt.Sprintf("%s : %s", myClient.GetEmail(), strings.Join(cmd, " "))})
+		}
 		switch cmd[0] {
 		case "login":
 			handleLogin(cmd, successStyle, errorStyle, resStyle)
@@ -94,6 +103,8 @@ Commands:
 			handleNormalize(cmd, successStyle, errorStyle, resStyle)
 		case "user":
 			handleUser(cmd, successStyle, errorStyle, resStyle)
+		case "blockchain":
+			handleBlockchain(cmd, successStyle, errorStyle, resStyle)
 		case "exit":
 			fmt.Println(successStyle.Render("Exiting the program. Goodbye!"))
 			return
@@ -104,6 +115,83 @@ Commands:
 }
 
 // 각 명령어 처리 함수들
+
+func AddBlcokchainLog(cmd []string) {
+
+}
+
+func handleBlockchain(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
+	if len(cmd) < 3 {
+		fmt.Println(errorStyle.Render("Usage: blockchain <cmd> [make | participate | exit | get] <arg...>"))
+		return
+	}
+	req := &pb.MessageRequest{Token: myClient.GetToken(), Cmd: cmd[1], Consortium: cmd[2]}
+	res := make(map[string]interface{})
+	var err error
+	switch cmd[1] {
+	case "make":
+		pbRes, pbErr := myBcClient.Do(req)
+		if pbErr != nil {
+			err = pbErr
+		} else {
+			if pbRes.Success {
+				res["success"] = "successful!"
+				myBcClient.Consortiums.Add(cmd[2])
+			} else {
+				res["success"] = "fail"
+			}
+		}
+	case "participate":
+		if myBcClient.Consortiums.Exists(cmd[2]) {
+			fmt.Println(errorStyle.Render("Already participated"))
+			return
+		}
+		pbRes, pbErr := myBcClient.Do(req)
+		if pbErr != nil {
+			err = pbErr
+		} else {
+			if pbRes.Success {
+				res["success"] = "successful!"
+				myBcClient.Consortiums.Add(cmd[2])
+			} else {
+				res["success"] = "fail"
+			}
+		}
+	case "exit":
+		if !myBcClient.Consortiums.Exists(cmd[2]) {
+			fmt.Println(errorStyle.Render("Not exist"))
+			return
+		}
+		pbRes, pbErr := myBcClient.Do(req)
+		if pbErr != nil {
+			err = pbErr
+		} else {
+			if pbRes.Success {
+				res["success"] = "successful!"
+				myBcClient.Consortiums.Remove(cmd[2])
+			} else {
+				res["success"] = "fail"
+			}
+		}
+	case "get":
+		pbRes, pbErr := myBcClient.Do(req)
+		if pbErr != nil {
+			err = pbErr
+		} else {
+			if pbRes.Success {
+				res["success"] = "successful!"
+				res["blockchain"] = pbRes.Blockchain
+			} else {
+				res["success"] = "fail"
+			}
+		}
+	default:
+		fmt.Println(errorStyle.Render("Usage: blockchain <cmd> [make | participate | get] <arg...>"))
+		return
+	}
+	handleResponse(res, err, successStyle, errorStyle, resStyle)
+}
+
 func handleUser(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if len(cmd) < 3 {
 		fmt.Println(errorStyle.Render("Usage: user <cmd> [register | update | info] <arg>"))
@@ -131,6 +219,13 @@ func handleLogin(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style
 		return
 	}
 	res, err := myClient.Login(cmd[1], cmd[2])
+	if err == nil {
+		req := &pb.MessageRequest{Token: myClient.GetToken(), Cmd: "init"}
+		pbRes, err := myBcClient.Do(req)
+		if err == nil {
+			myBcClient.InitPeer(pbRes.Blockchain)
+		}
+	}
 	handleResponse(res, err, successStyle, errorStyle, resStyle)
 }
 
@@ -308,6 +403,7 @@ func handleResponse(res interface{}, err error, successStyle, errorStyle, resSty
 		fmt.Println(errorStyle.Render(fmt.Sprintf("Error: [%v]", err)))
 	} else {
 		printSuccessResponse(res, successStyle, resStyle)
+
 	}
 }
 
