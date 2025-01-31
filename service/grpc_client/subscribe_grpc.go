@@ -64,7 +64,7 @@ func SubscribeToMOM(ctx context.Context, topic string, msgToApp chan map[string]
 func PublishToMOM(topic, msg string) error {
 	conn, err := grpc.Dial("localhost:9090", grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("failed to connect to MOM server: %v", err)
+		log.Printf("failed to connect to MOM server: %v", err)
 		return err
 	}
 	defer conn.Close()
@@ -79,7 +79,7 @@ func PublishToMOM(topic, msg string) error {
 		Body:  msg,
 	})
 	if err != nil {
-		log.Fatalf("failed to publish message: %v", err)
+		log.Printf("failed to publish message: %v", err)
 		return err
 	}
 
