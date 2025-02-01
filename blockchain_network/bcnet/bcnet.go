@@ -33,14 +33,16 @@ func NewBlockChain() *BlockChain {
 		Timestamp:    time.Now().String(),
 		Transactions: []string{"Genesis Block"},
 		PrevHash:     "",
-		Hash:         "",
 	}
 	genesisBlock.Hash = ""
 	genesisBlockStr, err := json.Marshal(genesisBlock)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error marshalling genesis block:", err)
 	}
-	return &BlockChain{Blocks: []Block{genesisBlock}, BlocksStr: []string{string(genesisBlockStr)}}
+	return &BlockChain{
+		Blocks:    []Block{genesisBlock},
+		BlocksStr: []string{string(genesisBlockStr)},
+	}
 }
 
 func calculateHash(block Block) string {
@@ -49,31 +51,22 @@ func calculateHash(block Block) string {
 	return fmt.Sprintf("%x", hash[:])
 }
 
-// func ValidBlock(prev, new Block) bool {
-// 	if prev.Hash != new.PrevHash {
-// 		return false
-// 	}
-// 	if new.Hash != calculateHash(new) {
-// 		return false
-// 	}
-// 	return true
-// }
-
 func (bc *BlockChain) AddBlock(transactions []string) error {
 	bc.mu.Lock()
 	defer bc.mu.Unlock()
+
 	prevBlock := bc.Blocks[len(bc.Blocks)-1]
 	newBlock := Block{
 		Index:        len(bc.Blocks),
 		Timestamp:    time.Now().String(),
 		Transactions: transactions,
 		PrevHash:     calculateHash(prevBlock),
-		Hash:         "",
 	}
 	newBlock.Hash = calculateHash(newBlock)
+
 	newBlockStr, err := json.Marshal(newBlock)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error marshalling new block:", err)
 	}
 	bc.Blocks = append(bc.Blocks, newBlock)
 	bc.BlocksStr = append(bc.BlocksStr, string(newBlockStr))
@@ -95,7 +88,7 @@ func NewConsortium(name, email string) *Consortium {
 }
 
 type PeerInfo struct {
-	info map[string][]string // email -> 컨소시엄 이름
+	info map[string][]string // email -> consortium names
 }
 
 func NewPeerInfo() *PeerInfo {
@@ -105,14 +98,11 @@ func NewPeerInfo() *PeerInfo {
 }
 
 func (p *PeerInfo) Add(email, consortium string) {
-	if _, exists := p.info[email]; !exists {
-		p.info[email] = make([]string, 0)
-	}
 	p.info[email] = append(p.info[email], consortium)
 }
 
 func (p *PeerInfo) Remove(email, consortium string) {
-	newSlice := make([]string, 0)
+	newSlice := make([]string, 0, len(p.info[email]))
 	for _, v := range p.info[email] {
 		if v != consortium {
 			newSlice = append(newSlice, v)
@@ -122,8 +112,8 @@ func (p *PeerInfo) Remove(email, consortium string) {
 }
 
 type BlockChainNetwork struct {
-	Blockchains map[string]*BlockChain // 컨소시엄 이름 -> 블록체인
-	Consortiums map[string]*Consortium // 컨소시엄 이름 -> 컨소시엄 메타데이터터
+	Blockchains map[string]*BlockChain // consortium name -> blockchain
+	Consortiums map[string]*Consortium // consortium name -> consortium metadata
 	Peerinfo    *PeerInfo
 	JWT_KEY     string
 }
@@ -143,124 +133,122 @@ type Request struct {
 	Consortium string
 }
 
-func (bcnet *BlockChainNetwork) InitPeer(req *Request) ([]string, error) {
-	tokenString := strings.TrimPrefix(req.Token, "Bearer ")
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func parseJWT(jwtKey, tokenStr string) (jwt.MapClaims, error) {
+	// Remove "Bearer " prefix if present.
+	tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.Printf("unexpected signing method: %v", token.Header["alg"])
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(bcnet.JWT_KEY), nil
+		return []byte(jwtKey), nil
 	})
 	if err != nil {
-		log.Printf("failed to parse token: %v", err)
+		return nil, fmt.Errorf("failed to parse token: %w", err)
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return claims, nil
+}
+
+func (bcnet *BlockChainNetwork) InitPeer(req *Request) ([]string, error) {
+	claims, err := parseJWT(bcnet.JWT_KEY, req.Token)
+	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		email, _ := claims.GetSubject()
-		if ret, exists := bcnet.Peerinfo.info[email]; exists {
-			return ret, nil
-		}
+
+	email, _ := claims.GetSubject()
+	if consortiums, exists := bcnet.Peerinfo.info[email]; exists {
+		return consortiums, nil
 	}
 	return []string{}, nil
 }
 
 func (bcnet *BlockChainNetwork) AddBlockChain(req *Request, transactions []string) error {
-	tokenString := strings.TrimPrefix(req.Token, "Bearer ")
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.Printf("unexpected signing method: %v", token.Header["alg"])
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(bcnet.JWT_KEY), nil
-	})
+	claims, err := parseJWT(bcnet.JWT_KEY, req.Token)
 	if err != nil {
-		log.Printf("failed to parse token: %v", err)
+		log.Println(err)
 		return err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		email, _ := claims.GetSubject()
-		if c, exists := bcnet.Consortiums[req.Consortium]; exists {
-			if c.ApprovedPeers[email] {
-				bcnet.Blockchains[req.Consortium].AddBlock(transactions)
-				return nil
-			}
-		}
-		return fmt.Errorf("'%s' doesn't exists or '%s' doesn't belong to the '%s'", req.Consortium, email, req.Consortium)
+
+	email, _ := claims.GetSubject()
+	consortium, exists := bcnet.Consortiums[req.Consortium]
+	if !exists || !consortium.ApprovedPeers[email] {
+		return fmt.Errorf("'%s' doesn't exist or '%s' doesn't belong to the consortium '%s'", req.Consortium, email, req.Consortium)
 	}
-	return fmt.Errorf("invalid token")
+
+	bcnet.Blockchains[req.Consortium].AddBlock(transactions)
+	return nil
 }
 
 func (bcnet *BlockChainNetwork) GetBlockChain(req *Request) (*BlockChain, error) {
-	tokenString := strings.TrimPrefix(req.Token, "Bearer ")
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.Printf("unexpected signing method: %v", token.Header["alg"])
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(bcnet.JWT_KEY), nil
-	})
+	claims, err := parseJWT(bcnet.JWT_KEY, req.Token)
 	if err != nil {
-		log.Printf("failed to parse token: %v", err)
+		log.Println(err)
 		return nil, err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		email, _ := claims.GetSubject()
-		if c, exists := bcnet.Consortiums[req.Consortium]; exists {
-			if c.ApprovedPeers[email] {
-				return bcnet.Blockchains[req.Consortium], nil
-			}
-		}
-		return nil, fmt.Errorf("'%s' doesn't exists or '%s' doesn't belong to the '%s'", req.Consortium, email, req.Consortium)
+
+	email, _ := claims.GetSubject()
+	consortium, exists := bcnet.Consortiums[req.Consortium]
+	if !exists || !consortium.ApprovedPeers[email] {
+		return nil, fmt.Errorf("'%s' doesn't exist or '%s' doesn't belong to the consortium '%s'", req.Consortium, email, req.Consortium)
 	}
-	return nil, fmt.Errorf("invalid token")
+
+	return bcnet.Blockchains[req.Consortium], nil
 }
 
 func (bcnet *BlockChainNetwork) ValidateRequest(req *Request) error {
-	tokenString := strings.TrimPrefix(req.Token, "Bearer ")
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.Printf("unexpected signing method: %v", token.Header["alg"])
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(bcnet.JWT_KEY), nil
-	})
+	claims, err := parseJWT(bcnet.JWT_KEY, req.Token)
 	if err != nil {
-		log.Printf("failed to parse token: %v", err)
+		log.Println(err)
 		return err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		email, _ := claims.GetSubject()
-		role := claims["role"].(string)
-		switch req.Cmd {
-		case "participate":
-			if !bcnet.Consortiums[req.Consortium].ApprovedPeers[email] {
-				bcnet.Consortiums[req.Consortium].ApprovedPeers[email] = true
-				bcnet.Peerinfo.Add(email, req.Consortium)
-				return nil
-			}
-			return fmt.Errorf("already participated")
-		case "make":
-			if role != "Admin" {
-				return fmt.Errorf("access denied for employee role")
-			}
-			if _, exists := bcnet.Consortiums[req.Consortium]; !exists {
-				bcnet.Consortiums[req.Consortium] = NewConsortium(req.Consortium, email)
-				bcnet.Blockchains[req.Consortium] = NewBlockChain()
-				bcnet.Consortiums[req.Consortium].ApprovedPeers[email] = true
-				bcnet.Peerinfo.Add(email, req.Consortium)
-				return nil
-			}
-			return fmt.Errorf("already existed '%s'", req.Consortium)
-		case "exit":
-			delete(bcnet.Consortiums[req.Consortium].ApprovedPeers, email)
-			bcnet.Peerinfo.Remove(email, req.Consortium)
-			return nil
-		default:
-			return fmt.Errorf("invalid request command")
+
+	email, _ := claims.GetSubject()
+	role, _ := claims["role"].(string)
+
+	switch req.Cmd {
+	case "participate":
+		consortium, exists := bcnet.Consortiums[req.Consortium]
+		if !exists {
+			return fmt.Errorf("consortium '%s' does not exist", req.Consortium)
 		}
+		if consortium.ApprovedPeers[email] {
+			return fmt.Errorf("already participated")
+		}
+		consortium.ApprovedPeers[email] = true
+		bcnet.Peerinfo.Add(email, req.Consortium)
+		return nil
+
+	case "make":
+		if role != "Admin" {
+			return fmt.Errorf("access denied for employee role")
+		}
+		if _, exists := bcnet.Consortiums[req.Consortium]; exists {
+			return fmt.Errorf("consortium '%s' already exists", req.Consortium)
+		}
+		bcnet.Consortiums[req.Consortium] = NewConsortium(req.Consortium, email)
+		bcnet.Blockchains[req.Consortium] = NewBlockChain()
+		// consortium 생성자는 자동으로 참여자로 등록.
+		bcnet.Consortiums[req.Consortium].ApprovedPeers[email] = true
+		bcnet.Peerinfo.Add(email, req.Consortium)
+		return nil
+
+	case "exit":
+		consortium, exists := bcnet.Consortiums[req.Consortium]
+		if !exists {
+			return fmt.Errorf("consortium '%s' does not exist", req.Consortium)
+		}
+		delete(consortium.ApprovedPeers, email)
+		bcnet.Peerinfo.Remove(email, req.Consortium)
+		return nil
+
+	default:
+		return fmt.Errorf("invalid request command")
 	}
-	log.Println("invalid token")
-	return fmt.Errorf("invalid token")
 }
