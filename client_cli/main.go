@@ -62,7 +62,7 @@ Commands:
 		schema delete <schemaName> <option> [-f]                     - Delete a schema
 		user register <fileName>                                     - Register users
 		user update <fileName>                                       - Update users
-		blockchain create <consortium>                                 - Create a consortium
+		blockchain create <consortium>                               - Create a consortium
 `
 
 	fmt.Println(guideStyle.Render(guide))

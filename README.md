@@ -1,8 +1,10 @@
 # AutoData Manager
 
-### [프로젝트 설명 및 실습 영상](https://youtu.be/2WY0ZnQstG8)
+### [주요 기능 실습 및 설명 영상](https://youtu.be/2WY0ZnQstG8)
 
-### [2차 프로젝트 설명 및 실습습 영상](https://www.youtube.com/watch?v=PDchZqndLcQ)
+### [추가된 기능(스키마 관리 및 사용자 관리) 실습 및 설명 영상](https://www.youtube.com/watch?v=PDchZqndLcQ)
+
+### [추가된 기능(블록체인 기반 데이터 변경 관리) 실습 및 설명 영상](https://youtu.be/VsRQsE-76Bs)
 
 <br>
 
@@ -28,7 +30,7 @@
 
 <br>
 
-## 추가된 기능 ( 2025.01.03 ~ 2025.01.20 )
+## 추가된 기능 ( 2025.01.03 ~ 2025.02.02 )
 
 - **스키마 관리**:
   - 스키마 삭제, 생성, 조회
@@ -37,6 +39,9 @@
   - 로그인/로그아웃
   - jwt를 사용한 역할에 따른 서비스 접근 제어
   - 회원정보 조회
+- **블록체인 기반 데이터 변경 관리**:
+  - 트랜잭션 기록 및 추적
+  - 사용자별 여러 그룹 참여
 
 <br>
 
@@ -65,32 +70,46 @@
 
   - MOM 서버에서 특정 토픽의 데이터를 구독하고 처리.
 
+- **Blockchain 네트워크**:
+
+  - 블록체인 기반 트랜잭션 기록 및 추적.
+
 <br>
 
 ```mermaid
 graph TD
+
     subgraph 서버
+		    OPENAI[OpenAI server]
         MOM[MOM server]
         REST[REST server]
-        OPENAI[OpenAI server]
     end
-
+    subgraph DataBase
+			PostgresSQL[PostgreSQL]
+		end
     subgraph 클라이언트
         ALARM[Alarm App]
-        CLI[CLI App]
-
+        subgraph 블록체인 네트워크
+					subgraph Consortium1
+						CLI2[CLI App2]
+						CLI1[CLI App1]
+					end
+					subgraph Consortium2
+						CLI3[CLI App3]
+						CLI4[CLI App4]
+					end
+				end
     end
 
-    DB[PostgreSQL]
-		OPENAIFLATFORM[OPEN AI PLATFORM]
-
+		OPENAI <-- gRPC --> REST
     MOM -- consume --> ALARM
     ALARM -- subscribe --> MOM
-    REST <-- REST --> CLI
-    REST <-- communication --> DB
+    REST <-- REST --> CLI1
+    REST <-- REST --> CLI2
+    REST <-- REST --> CLI3
+    REST <-- REST --> CLI4
+    REST <-- communication --> PostgresSQL
     REST -- publish --> MOM
-    OPENAI <-- gRPC --> REST
-    OPENAI <-- api req/res --> OPENAIFLATFORM
 ```
 
 <br>
@@ -163,6 +182,14 @@ graph TD
    user update <fileName>
    user info <email>
    ```
+
+10. **데이터 변경 관리**
+
+    ```bash
+    blockchain create <cosortium>
+    blockchain participate/exit <cosortium>
+    blockchain get <consortium>
+    ```
 
 <br>
 
