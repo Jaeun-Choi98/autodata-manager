@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"cju/client_cli/client"
+	"encoding/json"
 
 	pb "cju/proto/v1/bcnet"
 	"fmt"
@@ -17,6 +19,7 @@ var (
 	reader     = bufio.NewReader(os.Stdin)
 	myClient   = client.NewClient()
 	myBcClient *client.BcClient
+	sb         strings.Builder
 )
 
 func main() {
@@ -50,6 +53,8 @@ Commands:
 		normalize <fileName> <extension>                             - Normalize a table from a file (csv)
 		schema list                                                  - List all schemas in a database
 		user info <email>                                            - Read a user info
+		blockchain <option> [participate | exit] <consortium>        - Participate or exit a consortium
+		blockchain get <consortium>                                  - Get a blockchain from consortium
 		logout                                                       - Logout
 
 	Admin:
@@ -57,6 +62,7 @@ Commands:
 		schema delete <schemaName> <option> [-f]                     - Delete a schema
 		user register <fileName>                                     - Register users
 		user update <fileName>                                       - Update users
+		blockchain create <consortium>                                 - Create a consortium
 `
 
 	fmt.Println(guideStyle.Render(guide))
@@ -69,9 +75,9 @@ Commands:
 			fmt.Println(errorStyle.Render("Invalid command. Please try again."))
 			continue
 		}
-		if myClient.GetEmail() != "" {
-			myBcClient.SendAllConsortiumsTransactions(myClient.GetToken(), []string{fmt.Sprintf("%s : %s", myClient.GetEmail(), strings.Join(cmd, " "))})
-		}
+		sb.Reset()
+		sb.WriteString(fmt.Sprintf("%s: %s", myClient.GetEmail(), strings.Join(cmd, " ")))
+
 		switch cmd[0] {
 		case "login":
 			handleLogin(cmd, successStyle, errorStyle, resStyle)
@@ -114,22 +120,16 @@ Commands:
 	}
 }
 
-// 각 명령어 처리 함수들
-
-func AddBlcokchainLog(cmd []string) {
-
-}
-
 func handleBlockchain(cmd []string, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if len(cmd) < 3 {
-		fmt.Println(errorStyle.Render("Usage: blockchain <cmd> [make | participate | exit | get] <arg...>"))
+		fmt.Println(errorStyle.Render("Usage: blockchain <cmd> [create | participate | exit | get] <arg...>"))
 		return
 	}
 	req := &pb.MessageRequest{Token: myClient.GetToken(), Cmd: cmd[1], Consortium: cmd[2]}
 	res := make(map[string]interface{})
 	var err error
 	switch cmd[1] {
-	case "make":
+	case "create":
 		pbRes, pbErr := myBcClient.Do(req)
 		if pbErr != nil {
 			err = pbErr
@@ -180,13 +180,13 @@ func handleBlockchain(cmd []string, successStyle, errorStyle, resStyle lipgloss.
 		} else {
 			if pbRes.Success {
 				res["success"] = "successful!"
-				res["blockchain"] = pbRes.Blockchain
+				res["blockchain"] = FormatBlocks(pbRes.Blockchain)
 			} else {
 				res["success"] = "fail"
 			}
 		}
 	default:
-		fmt.Println(errorStyle.Render("Usage: blockchain <cmd> [make | participate | get] <arg...>"))
+		fmt.Println(errorStyle.Render("Usage: blockchain <cmd> [create | participate | get] <arg...>"))
 		return
 	}
 	handleResponse(res, err, successStyle, errorStyle, resStyle)
@@ -401,9 +401,14 @@ func handleNormalize(cmd []string, successStyle, errorStyle, resStyle lipgloss.S
 func handleResponse(res interface{}, err error, successStyle, errorStyle, resStyle lipgloss.Style) {
 	if err != nil {
 		fmt.Println(errorStyle.Render(fmt.Sprintf("Error: [%v]", err)))
+		if myClient.GetEmail() != "" {
+			myBcClient.SendAllConsortiumsTransactions(myClient.GetToken(), []string{sb.String() + fmt.Sprintf("(fail, %s)", err.Error())})
+		}
 	} else {
 		printSuccessResponse(res, successStyle, resStyle)
-
+		if myClient.GetEmail() != "" {
+			myBcClient.SendAllConsortiumsTransactions(myClient.GetToken(), []string{sb.String() + "(success)"})
+		}
 	}
 }
 
@@ -415,6 +420,29 @@ func printSuccessResponse(res interface{}, successStyle, resStyle lipgloss.Style
 			resStyle.Render(fmt.Sprintf("%v: %v", key, val)),
 		))
 	}
+}
+
+// 블록체인 내의 각 블록(JSON 문자열)의 slice를 보기 좋게 포맷팅된 단일 문자열로 변환.
+func FormatBlocks(blocks []string) string {
+	var sb strings.Builder
+	sb.WriteString("[\n ")
+
+	for i, b := range blocks {
+		var prettyJSON bytes.Buffer
+		// 각 JSON 문자열을 들여쓰기가 적용된 형태로 변환합니다.
+		err := json.Indent(&prettyJSON, []byte(b), " ", " ")
+		if err != nil {
+			// 변환에 실패하면 원본 문자열을 그대로 사용합니다.
+			prettyJSON.WriteString(b)
+		}
+		sb.WriteString(prettyJSON.String())
+		if i < len(blocks)-1 {
+			sb.WriteString(",\n ")
+		}
+	}
+
+	sb.WriteString("\n]")
+	return sb.String()
 }
 
 // 테이블 출력 함수

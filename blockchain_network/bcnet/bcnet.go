@@ -225,7 +225,7 @@ func (bcnet *BlockChainNetwork) ValidateRequest(req *Request) error {
 		bcnet.Peerinfo.Add(email, req.Consortium)
 		return nil
 
-	case "make":
+	case "create":
 		if role != "Admin" {
 			return fmt.Errorf("access denied for employee role")
 		}

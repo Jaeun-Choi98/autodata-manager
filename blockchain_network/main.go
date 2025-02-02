@@ -36,7 +36,7 @@ func (bcn *BCNServer) SendMessage(ctx context.Context, req *pb.MessageRequest) (
 			return &pb.MessageResponse{Success: false}, err
 		}
 		return &pb.MessageResponse{Success: true}, nil
-	case "make":
+	case "create":
 		if err := bcn.blockChainNetwork.ValidateRequest(bcnetReq); err != nil {
 			return &pb.MessageResponse{Success: false}, err
 		}
