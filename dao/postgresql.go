@@ -3,10 +3,13 @@ package dao
 import (
 	"cju/entity/auth"
 	"cju/utils"
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -16,9 +19,23 @@ type PostgreSQL struct {
 }
 
 func NewPostgreSQL(con string) (*PostgreSQL, error) {
-	db, err := gorm.Open(postgres.Open(con), &gorm.Config{
-		//Logger: logger.Default.LogMode(logger.Info),
-	})
+	/*
+	 하나의 con을 공유하면,
+	 1. 경쟁 상태나 데드락 발생
+	 2. 연결이 끊기면(db재시작,네트워크 문제) 복구 불가
+	 3. 대량의 api요청 시 성능 문제 발생생
+	*/
+	// db, err := gorm.Open(postgres.Open(con), &gorm.Config{
+	// 	//Logger: logger.Default.LogMode(logger.Info),
+	// })
+
+	pool, err := pgxpool.New(context.Background(), con)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	sqlDB := stdlib.OpenDBFromPool(pool)
+	db, err := gorm.Open(postgres.New(postgres.Config{Conn: sqlDB}), &gorm.Config{})
 	if err != nil {
 		log.Println("failed new db")
 		return nil, err
